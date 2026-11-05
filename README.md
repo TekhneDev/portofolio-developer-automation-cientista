@@ -2,6 +2,10 @@
 
 Portfólio de desenvolvedora full stack. HTML, CSS e JavaScript puros (ES modules), fundo em WebGL2/GLSL escrito à mão. Sem build e sem dependências.
 
+## Documentação
+
+Ideação, decisões, design system, arquitetura, roadmap V2 e guia mobile ficam em [`docs/`](docs/README.md).
+
 ## Rodar localmente
 
 Módulos ES precisam de servidor HTTP (abrir o arquivo direto não funciona):
