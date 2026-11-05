@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carla Braga — Desenvolvedora Full Stack</title>
+  <meta name="description" content="Carla Braga, desenvolvedora full stack com formação em ciência e engenharia de automação. Aplicações web, APIs e automações para produção. Disponível para CLT e PJ.">
+  <meta name="theme-color" content="#0E0A14">
+
+  <meta property="og:title" content="Carla Braga — Desenvolvedora Full Stack">
+  <meta property="og:description" content="Aplicações web, APIs e automações para produção. CLT ou PJ.">
+  <meta property="og:type" content="website">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    // Aplica tema e fonte salvos antes da primeira pintura (evita flash).
+    (function () {
+      var d = document.documentElement, theme = null, font = null;
+      try { theme = localStorage.getItem('cb-theme'); font = localStorage.getItem('cb-font'); } catch (e) {}
+      if (!theme) theme = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      d.dataset.theme = theme;
+      if (font === 'mono') d.dataset.font = 'mono';
+    })();
+  </script>
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip" href="#conteudo">Pular para o conteúdo</a>
+
+  <canvas id="field" aria-hidden="true"></canvas>
+  <div class="spot" aria-hidden="true"></div>
+
+  <div class="shell">
+    <header class="side" id="topo">
+      <div class="side__head">
+        <a class="brand" href="#sobre">
+          <span class="brand__name">Carla Braga</span>
+          <span class="brand__role">Desenvolvedora Full Stack</span>
+        </a>
+        <p class="side__tag">Aplicações web, APIs e as automações por trás delas.</p>
+
+        <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav">
+          <span class="menu-btn__label">Menu</span>
+        </button>
+      </div>
+
+      <nav class="nav" id="nav" aria-label="Seções">
+        <ol class="nav__list">
+          <li><a href="#sobre"><span class="nav__n">01</span><span class="nav__bar"></span><span class="nav__t">Sobre</span></a></li>
+          <li><a href="#projetos"><span class="nav__n">02</span><span class="nav__bar"></span><span class="nav__t">Projetos</span></a></li>
+          <li><a href="#lab"><span class="nav__n">03</span><span class="nav__bar"></span><span class="nav__t">Lab</span></a></li>
+          <li><a href="#trajetoria"><span class="nav__n">04</span><span class="nav__bar"></span><span class="nav__t">Trajetória</span></a></li>
+          <li><a href="#contratacao"><span class="nav__n">05</span><span class="nav__bar"></span><span class="nav__t">Contratação</span></a></li>
+          <li><a href="#contato"><span class="nav__n">06</span><span class="nav__bar"></span><span class="nav__t">Contato</span></a></li>
+        </ol>
+
+        <div class="prefs" role="group" aria-label="Preferências de exibição">
+          <button type="button" class="pref" data-pref="theme" aria-pressed="false">Tema claro</button>
+          <button type="button" class="pref" data-pref="font" aria-pressed="false">Mono</button>
+          <button type="button" class="pref" data-pref="sound" aria-pressed="false">Som</button>
+          <button type="button" class="pref" data-pref="panel" aria-pressed="false" aria-controls="panel">Calibrar <kbd>C</kbd></button>
+        </div>
+
+        <ul class="socials" id="socials"></ul>
+      </nav>
+    </header>
+
+    <main id="conteudo" tabindex="-1">
+      <!-- 01 · Sobre -->
+      <section class="sec hero" id="sobre" aria-labelledby="h-sobre">
+        <p class="eyebrow">Oi, eu sou</p>
+        <h1 class="hero__name" id="h-sobre"><span>Carla</span><span>Braga</span></h1>
+        <p class="hero__lede" id="lede"></p>
+
+        <dl class="avail" id="avail"></dl>
+
+        <div class="hero__cta">
+          <a class="btn btn--solid" href="#projetos">Ver projetos</a>
+          <a class="btn" id="cv-link" href="#">Baixar currículo (PDF)</a>
+        </div>
+
+        <h2 class="sec__label">Competências</h2>
+        <ul class="skills" id="skills"></ul>
+      </section>
+
+      <!-- 02 · Projetos -->
+      <section class="sec" id="projetos" aria-labelledby="h-projetos">
+        <header class="sec__head">
+          <span class="sec__n">02</span>
+          <h2 id="h-projetos">Projetos selecionados</h2>
+          <p class="sec__hint">Clique em um projeto para ver contexto, decisões técnicas e resultado.</p>
+        </header>
+        <ol class="projects" id="projects"></ol>
+      </section>
+
+      <!-- 03 · Lab -->
+      <section class="sec" id="lab" aria-labelledby="h-lab">
+        <header class="sec__head">
+          <span class="sec__n">03</span>
+          <h2 id="h-lab">Lab</h2>
+          <p class="sec__hint">Experimentos, ferramentas internas e provas de conceito.</p>
+        </header>
+        <ul class="lab" id="lab-list"></ul>
+      </section>
+
+      <!-- 04 · Trajetória -->
+      <section class="sec" id="trajetoria" aria-labelledby="h-traj">
+        <header class="sec__head">
+          <span class="sec__n">04</span>
+          <h2 id="h-traj">Trajetória</h2>
+        </header>
+
+        <div class="filter" role="group" aria-label="Filtrar experiência por área" id="filter"></div>
+        <p class="filter__msg" id="filter-msg" aria-live="polite"></p>
+        <ol class="timeline" id="timeline"></ol>
+
+        <div class="split">
+          <div>
+            <h3 class="sec__label">Publicações</h3>
+            <ul class="pubs" id="pubs"></ul>
+          </div>
+          <div>
+            <h3 class="sec__label">Certificações e prêmios</h3>
+            <div class="awards" id="awards"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 · Contratação -->
+      <section class="sec" id="contratacao" aria-labelledby="h-hire">
+        <header class="sec__head">
+          <span class="sec__n">05</span>
+          <h2 id="h-hire">Modelos de contratação</h2>
+          <p class="sec__hint">Trabalho em regime CLT ou como PJ. Veja o que muda em cada formato.</p>
+        </header>
+        <div class="hire" id="hire"></div>
+
+        <h3 class="sec__label">Como um projeto PJ começa</h3>
+        <ol class="steps" id="steps"></ol>
+
+        <h3 class="sec__label">Perguntas frequentes</h3>
+        <div class="faq" id="faq"></div>
+      </section>
+
+      <!-- 06 · Contato -->
+      <section class="sec contact" id="contato" aria-labelledby="h-contato">
+        <header class="sec__head">
+          <span class="sec__n">06</span>
+          <h2 id="h-contato">Contato</h2>
+        </header>
+        <p class="contact__lead">Tem uma vaga ou um projeto? Mande o contexto e o prazo. Respondo em até um dia útil.</p>
+        <a class="contact__mail" id="mail" href="#"></a>
+        <div class="contact__actions">
+          <button type="button" class="btn" id="copy-mail">Copiar e-mail</button>
+          <a class="btn btn--solid" id="whats" href="#" target="_blank" rel="noopener">Conversar no WhatsApp</a>
+        </div>
+        <p class="contact__status" id="copy-status" aria-live="polite"></p>
+      </section>
+
+      <footer class="foot">
+        <p>© <span id="year"></span> Carla Braga</p>
+        <p>Feito à mão com HTML, CSS, JavaScript e GLSL. Sem frameworks.</p>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Detalhe do projeto -->
+  <dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
+    <div class="sheet__inner" id="sheet-body"></div>
+  </dialog>
+
+  <!-- Painel de calibração do campo -->
+  <aside class="panel" id="panel" aria-label="Calibração do fundo" hidden></aside>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
