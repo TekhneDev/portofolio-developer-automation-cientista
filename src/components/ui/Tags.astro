@@ -1,0 +1,8 @@
+---
+/* Tags.astro — lista de tecnologias. `size="lg"` usa tags maiores (página do projeto). */
+interface Props { items: readonly string[]; size?: 'md' | 'lg' }
+const { items, size = 'md' } = Astro.props;
+---
+<ul class:list={['tags', { 'tags--lg': size === 'lg' }]}>
+  {items.map((t) => <li>{t}</li>)}
+</ul>

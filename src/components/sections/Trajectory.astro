@@ -1,0 +1,86 @@
+---
+/* =========================================================================
+   Trajectory.astro — 04 · Trajetória
+   Filtro por área (Barreto Lopes), linha do tempo, formação, publicações
+   e prêmios. A linha vertical da timeline é "desenhada" pelo scroll (GSAP).
+   ========================================================================= */
+import { getCollection } from 'astro:content';
+import { timelineTypes, publications, awards } from '../../data/site';
+import { EDU_LABEL } from '../../lib/utils';
+import SectionHead from '../ui/SectionHead.astro';
+import Tags from '../ui/Tags.astro';
+import Status from '../ui/Status.astro';
+
+const timeline = (await getCollection('trajetoria')).sort((a, b) => a.data.order - b.data.order);
+const education = (await getCollection('formacao')).sort((a, b) => a.data.order - b.data.order);
+const typeLabel = (id: string) => timelineTypes.find((t) => t.id === id)?.label ?? id;
+---
+<section class="sec" id="trajetoria" aria-labelledby="h-traj" data-morph="2">
+  <SectionHead n="04" id="h-traj" title="Trajetória" />
+
+  <div class="filter" role="group" aria-label="Filtrar experiência por área">
+    {timelineTypes.map((t) => (
+      <button type="button" class="chip-btn" data-type={t.id} aria-pressed="true">{t.label}</button>
+    ))}
+  </div>
+  <p class="filter__msg" aria-live="polite"></p>
+
+  <ol class="timeline">
+    <span class="timeline__line" aria-hidden="true"></span>
+    {timeline.map(({ data: t }) => (
+      <li class="tl" data-type={t.type} data-reveal>
+        <span class="tl__period">{t.period}</span>
+        <div class="tl__body">
+          <h3>{t.role} <span class="tl__org">· {t.org}</span></h3>
+          <p>{t.text}</p>
+          <Tags items={t.tags} />
+        </div>
+        <span class="tl__type">{typeLabel(t.type)}</span>
+      </li>
+    ))}
+  </ol>
+
+  <h3 class="sec__label" id="formacao">Formação</h3>
+  <ol class="edu" data-reveal-group>
+    {education.map(({ data: e }) => (
+      <li class="edu__item">
+        <div class="edu__top">
+          <span class="edu__level">{e.level}</span>
+          <span class="edu__period">{e.period}</span>
+        </div>
+        <h4 class="edu__course">{e.course}</h4>
+        <p class="edu__org">{e.org}{e.load && ` · ${e.load}`}</p>
+        <p class="edu__work">{e.work}</p>
+        <div class="edu__foot">
+          <Tags items={e.tags} />
+          <Status tone={e.status === 'andamento' ? 'experimento' : 'producao'} label={EDU_LABEL[e.status]} />
+        </div>
+      </li>
+    ))}
+  </ol>
+
+  <div class="split">
+    <div>
+      <h3 class="sec__label">Publicações</h3>
+      <ul class="pubs">
+        {publications.map((p) => (
+          <li>
+            {p.href ? <a href={p.href} target="_blank" rel="noopener">{p.title}</a> : <span>{p.title}</span>}
+            <span class="pubs__meta">{p.venue} · {p.year}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div>
+      <h3 class="sec__label">Certificações e prêmios</h3>
+      <div class="awards">
+        {awards.map((g) => (
+          <div class="awards__group">
+            <h4>{g.org}</h4>
+            <ul>{g.items.map((i) => <li><span>{i.title}</span><span class="awards__y">{i.year}</span></li>)}</ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,41 @@
+---
+/* =========================================================================
+   Projects.astro — 02 · Projetos
+   Lista tipográfica (Van Holtz / p5aholic): título gigante empilhado,
+   métrica + sparkline + status. Cada linha leva à página do estudo de caso;
+   `transition:name` faz o título "voar" até a página nova (View Transitions).
+   ========================================================================= */
+import { getCollection } from 'astro:content';
+import { url, lines, STATUS_LABEL } from '../../lib/utils';
+import SectionHead from '../ui/SectionHead.astro';
+import Sparkline from '../ui/Sparkline.astro';
+import Status from '../ui/Status.astro';
+
+const projects = (await getCollection('projetos')).sort((a, b) => a.data.order - b.data.order);
+---
+<section class="sec" id="projetos" aria-labelledby="h-projetos" data-morph="1">
+  <SectionHead n="02" id="h-projetos" title="Projetos selecionados"
+    hint="Toque em um projeto para ver contexto, decisões técnicas e resultado." />
+
+  <ol class="projects">
+    {projects.map((p, i) => (
+      <li data-reveal>
+        <a class="proj" href={url(`projetos/${p.id}`)}>
+          <span class="proj__i">{String(i + 1).padStart(2, '0')}</span>
+          <span class="proj__title" transition:name={`title-${p.id}`}>
+            {lines(p.data.title).map((l) => <span>{l}</span>)}
+          </span>
+          <span class="proj__meta">
+            <span class="proj__year">{p.data.year}</span>
+            <span class="proj__role">{p.data.role}</span>
+          </span>
+          <span class="proj__data">
+            <span class="proj__metric"><strong>{p.data.metric.value}</strong> {p.data.metric.label}</span>
+            <Sparkline points={p.data.spark} />
+            <Status tone={p.data.status} label={STATUS_LABEL[p.data.status]} />
+          </span>
+        </a>
+      </li>
+    ))}
+  </ol>
+</section>

@@ -1,0 +1,12 @@
+---
+/* Footer.astro — créditos e stack (como no portfólio da Brittany Chiang). */
+import { profile } from '../data/site';
+const year = new Date().getFullYear();
+---
+<footer class="foot">
+  <p>© {year} {profile.name}</p>
+  <p>
+    Astro · React · Three.js · GSAP —{' '}
+    <a href={profile.repo} target="_blank" rel="noopener">código no GitHub</a>
+  </p>
+</footer>

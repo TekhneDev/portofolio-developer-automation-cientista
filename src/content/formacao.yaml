@@ -1,0 +1,36 @@
+# =========================================================================
+# Formação acadêmica — mais recente primeiro (campo `order`).
+# status: concluido | andamento                                   [EDITAR]
+# =========================================================================
+- id: especializacao
+  order: 1
+  level: Pós-graduação lato sensu
+  course: Especialização em Arquitetura de Software e DevOps
+  org: Instituição W
+  period: 2023 — 2024
+  load: 420 h
+  status: concluido
+  work: "TCC: arquitetura orientada a eventos para integrar sistemas legados de ERP a serviços em nuvem."
+  tags: [Microsserviços, Mensageria, Kubernetes, CI/CD]
+
+- id: mestrado
+  order: 2
+  level: Mestrado
+  course: Mestrado em Engenharia Elétrica — Automação e Sistemas
+  org: Universidade Z
+  period: 2021 — 2023
+  load: Bolsista CAPES
+  status: concluido
+  work: "Dissertação: detecção de anomalias em séries temporais industriais com redes neurais recorrentes, validada em dados reais de uma linha de produção."
+  tags: [Python, PyTorch, Séries temporais, Estatística]
+
+- id: graduacao
+  order: 3
+  level: Graduação
+  course: Bacharelado em Engenharia de Controle e Automação
+  org: Universidade Z
+  period: 2015 — 2020
+  load: 4.200 h
+  status: concluido
+  work: "TCC: controle preditivo baseado em modelo aplicado a processos térmicos, com protótipo em CLP e supervisório."
+  tags: [Controle, Instrumentação, CLP, MATLAB]

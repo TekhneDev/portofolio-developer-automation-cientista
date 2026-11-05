@@ -1,0 +1,31 @@
+---
+/* Lab.astro — 03 · Lab: experimentos menores (seção inspirada no p5aholic). */
+import { lab } from '../../data/site';
+import SectionHead from '../ui/SectionHead.astro';
+import Tags from '../ui/Tags.astro';
+---
+<section class="sec" id="lab" aria-labelledby="h-lab" data-morph="1">
+  <SectionHead n="03" id="h-lab" title="Lab" hint="Experimentos, ferramentas internas e provas de conceito." />
+  <ul class="lab" data-reveal-group>
+    {lab.map((l) => (
+      <li>
+        {l.action === 'panel' ? (
+          <button type="button" class="lab__item" data-action="panel">
+            <h3>{l.title}</h3><p>{l.text}</p><Tags items={l.tags} />
+            <span class="lab__go">Abrir calibração</span>
+          </button>
+        ) : l.href ? (
+          <a class="lab__item" href={l.href} target="_blank" rel="noopener">
+            <h3>{l.title}</h3><p>{l.text}</p><Tags items={l.tags} />
+            <span class="lab__go">Ver código</span>
+          </a>
+        ) : (
+          <div class="lab__item">
+            <h3>{l.title}</h3><p>{l.text}</p><Tags items={l.tags} />
+            <span class="lab__go lab__go--muted">Em breve</span>
+          </div>
+        )}
+      </li>
+    ))}
+  </ul>
+</section>

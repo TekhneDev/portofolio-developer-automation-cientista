@@ -1,0 +1,43 @@
+---
+/* =========================================================================
+   Hero.astro — 01 · Sobre
+   "Oi, eu sou" + nome gigante (Barreto Lopes) + bloco de disponibilidade
+   (Van Holtz) + competências em cards.
+   `data-split` → o GSAP anima o nome letra por letra (SplitText).
+   ========================================================================= */
+import { profile, skills } from '../../data/site';
+import { url } from '../../lib/utils';
+import Tags from '../ui/Tags.astro';
+---
+<section class="sec hero" id="sobre" aria-labelledby="h-sobre" data-morph="0">
+  <p class="eyebrow">Oi, eu sou</p>
+  <h1 class="hero__name" id="h-sobre" data-split="chars">
+    <span>Carla</span><span>Braga</span>
+  </h1>
+  <p class="hero__lede">{profile.lede}</p>
+
+  <dl class="avail">
+    {profile.availability.map((a) => (
+      <div>
+        <dt>{a.label}</dt>
+        <dd>{a.live && <span class="led led--live"></span>}{a.value}</dd>
+      </div>
+    ))}
+  </dl>
+
+  <div class="hero__cta">
+    <a class="btn btn--solid" href="#projetos" data-magnetic>Ver projetos</a>
+    <a class="btn" href={url(profile.cv)} data-astro-prefetch="false" download data-magnetic>Baixar currículo (PDF)</a>
+  </div>
+
+  <h2 class="sec__label">Competências</h2>
+  <ul class="skills" data-reveal-group>
+    {skills.map((s) => (
+      <li class="skill">
+        <h3>{s.title}</h3>
+        <p>{s.text}</p>
+        <Tags items={s.tags} />
+      </li>
+    ))}
+  </ul>
+</section>

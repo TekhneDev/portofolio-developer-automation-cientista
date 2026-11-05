@@ -1,0 +1,10 @@
+---
+/* SectionHead.astro — cabeçalho numerado de seção (o número segue a ordem do menu). */
+interface Props { n: string; id: string; title: string; hint?: string }
+const { n, id, title, hint } = Astro.props;
+---
+<header class="sec__head">
+  <span class="sec__n">{n}</span>
+  <h2 id={id} data-split>{title}</h2>
+  {hint && <p class="sec__hint">{hint}</p>}
+</header>

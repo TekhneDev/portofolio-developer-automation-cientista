@@ -1,0 +1,109 @@
+---
+/* =========================================================================
+   Base.astro — Layout comum a todas as páginas
+   -------------------------------------------------------------------------
+   - <head>: metadados, fontes, Open Graph e script de tema (roda antes da
+     pintura para não "piscar" claro → escuro).
+   - ClientRouter: navegação com View Transitions entre home e projetos.
+   - DataCloud: cena 3D (React Three Fiber). `client:only` porque WebGL só
+     existe no navegador; `transition:persist` mantém a mesma cena viva ao
+     trocar de página (sem recarregar a GPU).
+   - Sidebar + <slot/> (conteúdo da página) + Footer.
+   - Scripts: ui.ts (menu, preferências, filtro…) e motion.ts (GSAP + Lenis).
+   ========================================================================= */
+import { ClientRouter } from 'astro:transitions';
+import Sidebar from '../components/Sidebar.astro';
+import Footer from '../components/Footer.astro';
+import DataCloud from '../components/three/DataCloud.tsx';
+import { profile } from '../data/site';
+import { url } from '../lib/utils';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Na home, os links do menu são âncoras locais (#projetos). */
+  isHome?: boolean;
+}
+
+const {
+  title = `${profile.name} — ${profile.role}`,
+  description = 'Desenvolvedora full stack com formação em ciência e engenharia de automação. Aplicações web, APIs e automações para produção. Disponível para CLT e PJ.',
+  isHome = false,
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL(url('og.png'), Astro.site);
+---
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <!-- viewport-fit=cover: usa a tela inteira em celulares com notch; o CSS compensa com env(safe-area-inset-*) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0E0A14" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={url('favicon.svg')} type="image/svg+xml" />
+    <link rel="sitemap" href={url('sitemap-index.xml')} />
+
+    <!-- Prévia ao compartilhar (WhatsApp, LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <!-- Tema e fonte salvos: aplicados antes da primeira pintura e de novo após cada navegação -->
+    <script is:inline>
+      (function () {
+        function apply() {
+          var d = document.documentElement, theme = null, font = null;
+          try { theme = localStorage.getItem('cb-theme'); font = localStorage.getItem('cb-font'); } catch (e) {}
+          if (!theme) theme = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          d.dataset.theme = theme;
+          if (font === 'mono') d.dataset.font = 'mono'; else delete d.dataset.font;
+        }
+        apply();
+        document.addEventListener('astro:after-swap', apply);
+      })();
+    </script>
+
+    <ClientRouter />
+  </head>
+  <body>
+    <a class="skip" href="#conteudo">Pular para o conteúdo</a>
+
+    <!-- Cena 3D atrás de todo o conteúdo -->
+    <div class="scene" aria-hidden="true" transition:persist="scene">
+      <DataCloud client:only="react" />
+    </div>
+    <!-- Painel de calibração: renderizado aqui via portal (fora da camada .scene,
+         que fica atrás do conteúdo e não recebe cliques) -->
+    <div id="calib-root" transition:persist="calib"></div>
+    <div class="spot" aria-hidden="true"></div>
+    <div class="cursor" aria-hidden="true"></div>
+
+    <div class="shell">
+      <Sidebar isHome={isHome} />
+      <main id="conteudo" tabindex="-1">
+        <slot />
+        <Footer />
+      </main>
+    </div>
+
+    <script>
+      // Módulos empacotados: rodam uma vez; cada um se reinicializa em astro:page-load.
+      import '../scripts/ui';
+      import '../scripts/motion';
+    </script>
+  </body>
+</html>

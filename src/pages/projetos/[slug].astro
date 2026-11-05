@@ -1,0 +1,78 @@
+---
+/* =========================================================================
+   projetos/[slug].astro — Página de estudo de caso
+   -------------------------------------------------------------------------
+   Uma página estática por arquivo em src/content/projetos/.
+   - Frontmatter → cabeçalho, ficha, problema/solução, resultados e stack.
+   - Corpo do MDX → texto longo (contexto, decisões técnicas, aprendizados).
+   - `transition:name` igual ao da lista: o título "voa" da home até aqui.
+   - Rodapé com projeto anterior/próximo.
+   ========================================================================= */
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Tags from '../../components/ui/Tags.astro';
+import Status from '../../components/ui/Status.astro';
+import { url, lines, STATUS_LABEL } from '../../lib/utils';
+
+export async function getStaticPaths() {
+  const all = (await getCollection('projetos')).sort((a, b) => a.data.order - b.data.order);
+  return all.map((entry, i) => ({
+    params: { slug: entry.id },
+    props: { entry, prev: all[i - 1] ?? all[all.length - 1], next: all[i + 1] ?? all[0] },
+  }));
+}
+
+const { entry, prev, next } = Astro.props;
+const p = entry.data;
+const { Content } = await render(entry);
+const plainTitle = p.title.replace(/\n/g, ' ');
+---
+<Base title={`${plainTitle} — Carla Braga`} description={p.problem}>
+  <article class="case" data-morph="1">
+    <a class="case__back" href={`${url()}#projetos`}>← Todos os projetos</a>
+
+    <p class="eyebrow">{p.year} · {p.role}</p>
+    <h1 class="case__title" transition:name={`title-${entry.id}`}>
+      {lines(p.title).map((l) => <span>{l}</span>)}
+    </h1>
+    <Status tone={p.status} label={STATUS_LABEL[p.status]} />
+
+    <dl class="facts">
+      <div><dt>Cliente</dt><dd>{p.client}</dd></div>
+      <div><dt>Duração</dt><dd>{p.period}</dd></div>
+      <div><dt>Papel</dt><dd>{p.role}</dd></div>
+    </dl>
+
+    <div class="case__cols" data-reveal-group>
+      <section><h2>Problema</h2><p>{p.problem}</p></section>
+      <section><h2>Solução</h2><p>{p.solution}</p></section>
+    </div>
+
+    <h2 class="case__sub">Resultado</h2>
+    <ul class="results" data-reveal-group>
+      {p.results.map((r) => (
+        <li><strong data-count>{r.value}</strong><span>{r.label}</span></li>
+      ))}
+    </ul>
+
+    <h2 class="case__sub">Stack</h2>
+    <Tags items={p.stack} size="lg" />
+
+    <div class="prose" data-reveal>
+      <Content />
+    </div>
+
+    {(p.links.github || p.links.demo || p.links.case) && (
+      <div class="case__links">
+        {p.links.github && <a class="btn" href={p.links.github} target="_blank" rel="noopener" data-magnetic>Código no GitHub</a>}
+        {p.links.demo && <a class="btn" href={p.links.demo} target="_blank" rel="noopener" data-magnetic>Ver demo</a>}
+        {p.links.case && <a class="btn" href={p.links.case} target="_blank" rel="noopener" data-magnetic>Ler estudo completo</a>}
+      </div>
+    )}
+
+    <nav class="case__nav" aria-label="Outros projetos">
+      <a href={url(`projetos/${prev.id}`)}><span>Anterior</span>{prev.data.title.replace(/\n/g, ' ')}</a>
+      <a href={url(`projetos/${next.id}`)}><span>Próximo</span>{next.data.title.replace(/\n/g, ' ')}</a>
+    </nav>
+  </article>
+</Base>

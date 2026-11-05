@@ -1,0 +1,9 @@
+---
+/* Sparkline.astro — mini-linha em SVG. `data-draw` faz o GSAP "desenhar" a linha ao aparecer. */
+import { sparkPath } from '../../lib/utils';
+interface Props { points: number[] }
+const { d, lx, ly, w, h } = sparkPath(Astro.props.points);
+---
+<svg class="spark" viewBox={`0 0 ${w} ${h}`} width={w} height={h} aria-hidden="true" data-draw>
+  <path d={d} /><circle cx={lx} cy={ly} r="2.2" />
+</svg>

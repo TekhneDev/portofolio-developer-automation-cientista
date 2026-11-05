@@ -1,0 +1,59 @@
+---
+/* =========================================================================
+   Sidebar.astro — navegação principal
+   -------------------------------------------------------------------------
+   Um único componente, três formas (o CSS decide):
+   - Desktop (≥1100): coluna fixa à esquerda, menu com barra que cresce.
+   - Tablet (700–1099): header fixo com menu horizontal.
+   - Celular (<700): barra com nome + botão "Menu"; o menu abre em tela cheia.
+   O comportamento (seção ativa, abrir/fechar, preferências) está em ui.ts.
+   ========================================================================= */
+import { profile, nav } from '../data/site';
+import { url } from '../lib/utils';
+
+interface Props { isHome: boolean }
+const { isHome } = Astro.props;
+
+// Na home: âncora local. Em outras páginas: volta para a home na seção certa.
+const href = (id: string) => (isHome ? `#${id}` : `${url()}#${id}`);
+---
+<header class="side" id="topo">
+  <div class="side__head">
+    <a class="brand" href={url()} data-magnetic>
+      <span class="brand__name">{profile.name}</span>
+      <span class="brand__role">{profile.role}</span>
+    </a>
+    <p class="side__tag">{profile.tagline}</p>
+
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav">
+      <span class="menu-btn__label">Menu</span>
+    </button>
+  </div>
+
+  <nav class="nav" id="nav" aria-label="Seções">
+    <ol class="nav__list">
+      {nav.map((item, i) => (
+        <li>
+          <a href={href(item.id)} data-section={item.id}>
+            <span class="nav__n">{String(i + 1).padStart(2, '0')}</span>
+            <span class="nav__bar"></span>
+            <span class="nav__t">{item.label}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+
+    <div class="prefs" role="group" aria-label="Preferências de exibição">
+      <button type="button" class="pref" data-pref="theme" aria-pressed="false">Tema claro</button>
+      <button type="button" class="pref" data-pref="font" aria-pressed="false">Mono</button>
+      <button type="button" class="pref" data-pref="sound" aria-pressed="false">Som</button>
+      <button type="button" class="pref" data-pref="panel" aria-pressed="false">Calibrar <kbd>C</kbd></button>
+    </div>
+
+    <ul class="socials">
+      {profile.socials.map((s) => (
+        <li><a href={s.href} {...(s.href.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}>{s.label}</a></li>
+      ))}
+    </ul>
+  </nav>
+</header>

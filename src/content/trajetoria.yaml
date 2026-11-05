@@ -1,0 +1,39 @@
+# =========================================================================
+# Trajetória profissional — mais recente primeiro (campo `order`).
+# type: dev | automacao | pesquisa  (é o que o filtro usa)        [EDITAR]
+# =========================================================================
+- id: fullstack-x
+  order: 1
+  type: dev
+  period: 2024 — atual
+  role: Desenvolvedora Full Stack
+  org: Empresa X
+  text: Desenvolvimento de produtos web em Next.js e NestJS, desenho de APIs, revisão de código e definição de padrões de testes e CI/CD para o time.
+  tags: [Next.js, NestJS, PostgreSQL, AWS]
+
+- id: automacao-y
+  order: 2
+  type: automacao
+  period: 2022 — 2024
+  role: Engenheira de Automação
+  org: Empresa Y
+  text: Automação de processos industriais e administrativos, integração de CLP e SCADA com sistemas web e coleta de dados de sensores em tempo real.
+  tags: [Python, OPC UA, Node-RED, Grafana]
+
+- id: frontend-pj
+  order: 3
+  type: dev
+  period: 2021 — 2022
+  role: Desenvolvedora Front-end (PJ)
+  org: Projetos sob demanda
+  text: Landing pages, dashboards e sistemas internos para pequenas e médias empresas, do levantamento de requisitos à publicação.
+  tags: [React, TypeScript, Vercel]
+
+- id: pesquisa-mestrado
+  order: 4
+  type: pesquisa
+  period: 2021 — 2023
+  role: Pesquisadora no mestrado
+  org: Laboratório de Automação · Universidade Z
+  text: Modelagem e análise de dados experimentais, pipelines reprodutíveis em Python e publicação de resultados em periódicos e congressos.
+  tags: [Python, Estatística, LaTeX]

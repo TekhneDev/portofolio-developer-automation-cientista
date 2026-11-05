@@ -1,0 +1,34 @@
+---
+# [EDITAR]
+title: "Painel de\nQualidade de Dados"
+order: 4
+year: 2024
+role: Front-end · dados
+client: Projeto interno
+period: 2 meses
+status: producao
+metric: { value: "−62%", label: "incidentes de dados" }
+spark: [30, 28, 26, 22, 19, 17, 14, 13, 12, 11]
+problem: Erros em tabelas de origem só eram percebidos quando um relatório executivo saía errado.
+solution: Construí testes de dados no dbt e um painel em React que mostra a saúde de cada tabela, com histórico, responsável e alerta automático.
+results:
+  - { value: "−62%", label: "incidentes" }
+  - { value: "4 min", label: "tempo de detecção" }
+  - { value: "180", label: "tabelas monitoradas" }
+stack: [React, TypeScript, dbt, BigQuery, D3.js]
+links: {}
+---
+
+## Contexto
+
+O time de dados descobria problemas pelos usuários finais. Não havia visão central de quais tabelas estavam atrasadas, incompletas ou com valores fora do esperado.
+
+## Decisões técnicas
+
+- **Testes no dbt** (unicidade, nulos, faixas, atualização) rodando a cada carga.
+- **Painel em React + D3** com mapa de saúde por domínio e histórico de cada teste.
+- **Responsável por tabela**: o alerta vai direto para quem pode corrigir.
+
+## O que aprendi
+
+Um painel só funciona se alguém olha. Os alertas certos, para a pessoa certa, foram mais importantes que os gráficos.

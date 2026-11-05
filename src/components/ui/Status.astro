@@ -1,0 +1,6 @@
+---
+/* Status.astro — selo com "LED": verde = em produção/concluído, rosa = experimento/em andamento. */
+interface Props { tone: 'producao' | 'experimento'; label: string }
+const { tone, label } = Astro.props;
+---
+<span class={`status status--${tone}`}><span class="led"></span>{label}</span>

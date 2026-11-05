@@ -1,0 +1,35 @@
+---
+# [EDITAR] Troque pelos dados reais. Formato: problema → solução → resultado medido.
+title: "Portal de\nOperações"
+order: 1
+year: 2025
+role: Full stack · líder técnica
+client: Empresa de logística (confidencial)
+period: 6 meses
+status: producao
+metric: { value: "p95 180 ms", label: "tempo de resposta da API" }
+spark: [42, 38, 40, 31, 28, 24, 22, 19, 18, 18]
+problem: A operação acompanhava entregas em planilhas atualizadas manualmente, com até 2 horas de atraso entre o evento e a informação.
+solution: Desenhei e implementei um painel em tempo real com eventos via WebSocket, API em NestJS com cache em Redis e controle de acesso por perfil. Deploy em contêineres com pipeline de CI/CD e testes end-to-end.
+results:
+  - { value: "−95%", label: "atraso da informação" }
+  - { value: "180 ms", label: "p95 da API" }
+  - { value: "320", label: "usuários ativos/dia" }
+stack: [Next.js, TypeScript, NestJS, PostgreSQL, Redis, WebSocket, AWS]
+links: {}
+---
+
+## Contexto
+
+O time de operações coordenava cerca de 2 mil entregas por dia a partir de planilhas compartilhadas. Cada atualização dependia de alguém copiar dados do sistema da transportadora, e decisões de rota eram tomadas com informação de até duas horas atrás.
+
+## Decisões técnicas
+
+- **Eventos em vez de polling.** As transportadoras enviam webhooks; uma fila normaliza os eventos e publica via WebSocket só para quem está vendo aquela operação.
+- **Cache de leitura em Redis** para as consultas mais pesadas do painel, com invalidação por evento.
+- **Permissões por perfil** (operador, supervisor, financeiro) definidas no back-end e refletidas na interface.
+- **Testes end-to-end com Playwright** cobrindo os fluxos críticos antes de cada deploy.
+
+## O que aprendi
+
+Medir o p95 desde a primeira semana mudou as prioridades: o gargalo não estava no banco, e sim na serialização de respostas grandes. Paginação no servidor resolveu mais do que qualquer índice.

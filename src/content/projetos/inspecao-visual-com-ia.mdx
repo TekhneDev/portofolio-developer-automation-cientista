@@ -1,0 +1,35 @@
+---
+# [EDITAR]
+title: "Inspeção\nVisual com IA"
+order: 5
+year: 2023
+role: Pesquisa · ML
+client: Projeto de pesquisa aplicada
+period: 5 meses
+status: experimento
+metric: { value: "94%", label: "acurácia em validação" }
+spark: [61, 68, 72, 79, 83, 86, 89, 91, 93, 94]
+problem: A inspeção de defeitos em linha de produção era visual e amostral, deixando passar peças com falha.
+solution: Treinei uma rede convolucional com dados rotulados na própria linha, exportei para ONNX e servi o modelo em uma API leve rodando em hardware de borda.
+results:
+  - { value: "94%", label: "acurácia" }
+  - { value: "35 ms", label: "inferência por peça" }
+  - { value: "100%", label: "das peças inspecionadas" }
+stack: [Python, PyTorch, OpenCV, ONNX Runtime, FastAPI]
+links: {}
+---
+
+## Contexto
+
+A inspeção era feita por amostragem, uma peça a cada lote. Defeitos pequenos passavam e só apareciam no cliente.
+
+## Decisões técnicas
+
+- **Dados da própria linha**: 6 mil imagens rotuladas com o time de qualidade, com iluminação controlada.
+- **Modelo leve** (CNN pequena + *data augmentation*) para caber no hardware de borda.
+- **Exportação para ONNX** e inferência com ONNX Runtime, sem GPU.
+- **API em FastAPI** integrada ao CLP para separar a peça reprovada.
+
+## O que aprendi
+
+A maior melhora de acurácia veio da iluminação e da rotulagem, não da arquitetura da rede.

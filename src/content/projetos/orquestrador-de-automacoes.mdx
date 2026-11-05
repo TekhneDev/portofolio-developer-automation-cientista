@@ -1,0 +1,35 @@
+---
+# [EDITAR]
+title: "Orquestrador\nde Automações"
+order: 2
+year: 2025
+role: Back-end · automação
+client: Indústria de alimentos (confidencial)
+period: 4 meses
+status: producao
+metric: { value: "−40 h/mês", label: "trabalho manual eliminado" }
+spark: [10, 14, 18, 22, 27, 31, 36, 38, 40, 40]
+problem: Rotinas de conciliação, emissão de relatórios e integração com o ERP eram executadas à mão por três pessoas, com retrabalho frequente.
+solution: Criei um orquestrador de tarefas com filas, reprocessamento automático e trilha de auditoria. Cada automação é um módulo versionado com testes e alertas de falha no Slack.
+results:
+  - { value: "40 h", label: "economizadas por mês" }
+  - { value: "0,3%", label: "taxa de falha" }
+  - { value: "14", label: "rotinas automatizadas" }
+stack: [Python, FastAPI, Celery, Redis, Docker, Grafana]
+links: {}
+---
+
+## Contexto
+
+Três analistas gastavam boa parte da semana em tarefas repetitivas: baixar extratos, conciliar com o ERP, gerar relatórios e reenviar o que falhava. Erros só eram percebidos no fechamento do mês.
+
+## Decisões técnicas
+
+- **Cada automação é um módulo** com entrada, saída e testes próprios, versionado no Git.
+- **Filas com reprocessamento** e *backoff* exponencial: falhas temporárias se resolvem sozinhas.
+- **Trilha de auditoria**: toda execução registra quem, quando, o que entrou e o que saiu.
+- **Painel no Grafana** e alerta no Slack só para falhas que exigem ação humana.
+
+## O que aprendi
+
+Automatizar o processo errado só deixa o erro mais rápido. As duas primeiras semanas foram de mapeamento com o time, e três rotinas foram eliminadas em vez de automatizadas.

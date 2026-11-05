@@ -1,0 +1,35 @@
+---
+# [EDITAR]
+title: "Integração\nde Pedidos"
+order: 3
+year: 2024
+role: Back-end · ERP e e-commerce
+client: Varejo omnichannel (confidencial)
+period: 3 meses
+status: producao
+metric: { value: "12 mil", label: "pedidos sincronizados/dia" }
+spark: [3, 4, 5, 7, 6, 8, 9, 11, 12, 12]
+problem: Estoque e pedidos divergiam entre a loja virtual e o ERP, gerando vendas sem estoque e cancelamentos.
+solution: Implementei uma camada de integração orientada a eventos, com idempotência, retentativas com backoff e painel de reconciliação para o time financeiro.
+results:
+  - { value: "−87%", label: "cancelamentos por ruptura" }
+  - { value: "12 mil", label: "pedidos/dia" }
+  - { value: "99,9%", label: "disponibilidade" }
+stack: [Node.js, NestJS, RabbitMQ, PostgreSQL, OpenAPI]
+links: {}
+---
+
+## Contexto
+
+A sincronização entre loja e ERP rodava por arquivos a cada 30 minutos. Em dias de promoção, produtos esgotados continuavam à venda e o cancelamento virava atendimento e reembolso.
+
+## Decisões técnicas
+
+- **Eventos idempotentes**: cada mensagem tem chave única; reprocessar nunca duplica pedido.
+- **Fila com dead-letter** para mensagens que falham repetidamente, com tela de reprocesso manual.
+- **Contrato OpenAPI** publicado para os dois times, gerando clientes tipados.
+- **Reconciliação diária** automática que aponta divergências antes que virem problema.
+
+## O que aprendi
+
+Integração é sobretudo acordo entre times. O contrato OpenAPI escrito antes do código evitou semanas de idas e vindas.

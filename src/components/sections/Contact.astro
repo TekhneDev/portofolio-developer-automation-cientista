@@ -1,0 +1,16 @@
+---
+/* Contact.astro — 06 · Contato: e-mail grande, copiar e WhatsApp com mensagem pronta. */
+import { profile } from '../../data/site';
+import SectionHead from '../ui/SectionHead.astro';
+const whats = `https://wa.me/${profile.whatsapp}?text=${encodeURIComponent(profile.whatsappMsg)}`;
+---
+<section class="sec contact" id="contato" aria-labelledby="h-contato" data-morph="3">
+  <SectionHead n="06" id="h-contato" title="Contato" />
+  <p class="contact__lead">Tem uma vaga ou um projeto? Mande o contexto e o prazo. Respondo em até um dia útil.</p>
+  <a class="contact__mail" href={`mailto:${profile.email}`} data-magnetic>{profile.email}</a>
+  <div class="contact__actions">
+    <button type="button" class="btn" data-copy={profile.email} data-magnetic>Copiar e-mail</button>
+    <a class="btn btn--solid" href={whats} target="_blank" rel="noopener" data-magnetic>Conversar no WhatsApp</a>
+  </div>
+  <p class="contact__status" aria-live="polite"></p>
+</section>
