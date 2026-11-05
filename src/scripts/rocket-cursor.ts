@@ -36,6 +36,7 @@ const ROCKET: [number, number][] = [
   [-0.72, 0.42], [0.7, 0.42], [0.95, 0.37], [1.2, 0.28], [1.42, 0.15],      // corpo + bico
 ];
 const NOZZLE_X = -1.36 * K;   // fim do bocal (onde nasce a chama)
+const FIRE_ALPHA = 0.55;      // opacidade máxima da chama e das brasas
 
 /** Reamostra um polígono fechado em `n` pontos igualmente espaçados no perímetro. */
 function resample(poly: [number, number][], n: number): [number, number][] {
@@ -163,8 +164,9 @@ export function mountRocketCursor(host: HTMLElement) {
     const wob = Math.sin(t * 31) * 1.6 * fl;
     fire.setAttribute('d', flamePath(len, 0.27 * K, wob));
     core.setAttribute('d', flamePath(len * 0.55, 0.15 * K, wob * 0.6));
-    fire.style.opacity = String(Math.min(1, fl * 1.6) * m);
-    core.style.opacity = String(Math.min(1, fl * 1.8) * m);
+    // FIRE_ALPHA deixa a chama translúcida (o fundo aparece através dela).
+    fire.style.opacity = String(Math.min(1, fl * 1.6) * m * FIRE_ALPHA);
+    core.style.opacity = String(Math.min(1, fl * 1.8) * m * FIRE_ALPHA * 0.9);
 
     // Brasas: saem do bocal, derivam para trás e apagam.
     embers.forEach((e, i) => {
@@ -175,7 +177,7 @@ export function mountRocketCursor(host: HTMLElement) {
       e.setAttribute('cx', ex.toFixed(2));
       e.setAttribute('cy', (C + life.y + Math.sin(t * 9 + i) * 1.2).toFixed(2));
       e.setAttribute('r', (1.3 * (1 - life.t) + 0.3).toFixed(2));
-      e.style.opacity = String(Math.max(0, fl - 0.2) * (1 - life.t) * m);
+      e.style.opacity = String(Math.max(0, fl - 0.2) * (1 - life.t) * m * FIRE_ALPHA);
     });
 
     g.setAttribute('transform', `rotate(${(angle * 180) / Math.PI} ${C} ${C})`);

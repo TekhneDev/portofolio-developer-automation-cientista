@@ -3,7 +3,7 @@
 ## 2.5.0 — 2026-11-05
 ### Alterado
 - **Cursor:** em movimento, o anel agora se transforma (morph ponto a ponto) no contorno de um foguete de verdade: bico cônico, corpo, janelinha, aletas e bocal. As cores continuam as do site.
-- **Chama com cores de fogo:** duas camadas tremulando, com núcleo branco e amarelo e bordas laranja e vermelhas, mais brasas que saem do bocal. Cresce com a velocidade do mouse.
+- **Chama com cores de fogo:** duas camadas tremulando, com núcleo branco e amarelo e bordas laranja e vermelhas, mais brasas que saem do bocal. Cresce com a velocidade do mouse. A chama é translúcida (opacidade máx. 0.55, ajustável em `FIRE_ALPHA`).
 
 ## 2.4.0 — 2026-11-05
 ### Adicionado
