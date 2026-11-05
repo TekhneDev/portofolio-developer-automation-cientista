@@ -98,14 +98,15 @@ void main() {
    GRÃO DE LUZ — inspirado no fundo do p5aholic.me
    -------------------------------------------------------------------------
    Fragment shader usado por grain.ts (canvas próprio, atrás das partículas):
-   1. Uma faixa de luz difusa na diagonal, do lado esquerdo, que "respira"
-      e desliza devagar.
-   2. Névoa: ruído fractal leve (3 oitavas) modulando a faixa.
+   1. Um CÍRCULO grande, com o centro fora da tela à esquerda — aparece
+      "cortado" pela borda. Iluminado de um lado (como uma esfera/planeta),
+      com a borda levemente mais clara.
+   2. Animação leve: o raio "respira" e o centro flutua alguns pixels;
+      uma névoa (ruído de 3 oitavas) desliza devagar por dentro.
    3. Grão: cada pixel compara a luz com um número aleatório FIXO daquele
-      pixel ("pontilhismo"/dithering). Onde há mais luz, mais pontos acesos.
-      O grão não pisca — só a luz se move — o que deixa o efeito calmo.
-   O grão é calculado por pixel de CSS (divide por uPixelRatio), então tem
-   o mesmo tamanho em telas comuns e retina.
+      pixel (pontilhismo). O grão não pisca — só a luz se move.
+   Distâncias em "alturas de tela" (corrige a proporção), então o círculo
+   é sempre redondo. O grão é por pixel de CSS (divide por uPixelRatio).
    ========================================================================= */
 
 export const grainFragment = /* glsl */ `
@@ -115,7 +116,7 @@ uniform float uPixelRatio;
 uniform vec2  uMouse;      // cursor em 0..1
 uniform vec3  uTint;       // cor do grão (tema)
 uniform float uIntensity;  // 0 = desligado
-uniform float uCenter;     // posição horizontal da faixa (0..1)
+uniform float uRadius;     // raio do círculo (em alturas de tela)
 
 varying vec2 vUv;
 
@@ -142,28 +143,38 @@ void main() {
   vec2 uv = vUv;
   float aspect = uRes.x / uRes.y;
   float t = uTime;
+  vec2 q = vec2(uv.x * aspect, uv.y);              // coordenadas "redondas"
 
-  // Faixa diagonal: inclina com a altura e desliza devagar para os lados.
-  float x = uv.x - uCenter - 0.06 * sin(t * 0.11) + (uv.y - 0.5) * 0.32;
-  float band = exp(-x * x * 26.0);         // faixa estreita
+  // Centro fora da tela à esquerda (~35% do raio para fora), flutuando de leve.
+  float R = uRadius * (1.0 + 0.025 * sin(t * 0.21));
+  vec2 c = vec2(-R * 0.35 + 0.012 * sin(t * 0.13), 0.52 + 0.025 * cos(t * 0.09));
+  vec2 d = q - c;
+  float dist = length(d);
 
-  // Névoa que se move dentro da faixa.
-  float fog = fbm(vec2(uv.x * aspect, uv.y) * 1.6 + vec2(t * 0.025, -t * 0.018));
-  float light = band * (0.35 + 0.85 * fog);
+  // Disco com borda suave (1 = dentro, 0 = fora).
+  float disc = 1.0 - smoothstep(R - 0.035, R + 0.005, dist);
 
-  // Um pouco de luz extra perto do cursor.
+  // Sombreamento de esfera: mais luz no lado de cima/direita, aro claro.
+  vec2 n = d / R;
+  float lit = clamp(dot(n, normalize(vec2(0.75, 0.55))), 0.0, 1.0);
+  float rim = smoothstep(0.7, 1.0, dist / R);
+  float shade = 0.18 + 0.55 * lit + 0.35 * rim;
+
+  // Névoa deslizando por dentro do círculo.
+  float fog = fbm(q * 2.2 + vec2(t * 0.02, -t * 0.015));
+  float light = disc * shade * (0.55 + 0.6 * fog);
+
+  // Leve reforço perto do cursor (só dentro do círculo).
   vec2 m = (uv - uMouse) * vec2(aspect, 1.0);
-  light += 0.18 * exp(-dot(m, m) * 6.0);
+  light += disc * 0.12 * exp(-dot(m, m) * 8.0);
 
-  // Escurece em direção à base (como um feixe vindo de cima).
-  light *= mix(0.55, 1.0, uv.y);
   light = clamp(light * uIntensity, 0.0, 1.0);
 
   // Grão: pontos acesos onde o aleatório fixo do pixel é menor que a luz.
   float g = hash(floor(gl_FragCoord.xy / uPixelRatio));
   float dotOn = step(g, light * light * 0.9);
 
-  float alpha = dotOn * 0.42 + light * 0.05;    // grão + véu bem fraco
+  float alpha = dotOn * 0.38 + light * 0.04;    // grão + véu bem fraco
   gl_FragColor = vec4(uTint, alpha);
 }
 `;

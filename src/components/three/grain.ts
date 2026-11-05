@@ -1,8 +1,8 @@
 /* =========================================================================
    grain.ts — "Luz granulada" em WebGL puro (sem three.js)
    -------------------------------------------------------------------------
-   Inspirado no fundo do p5aholic.me: uma faixa de luz difusa, do lado
-   esquerdo, desenhada com grão fixo, que se move devagar.
+   Inspirado no fundo do p5aholic.me: um círculo de luz granulada, cortado
+   pela borda esquerda da tela, que "respira" e flutua devagar.
 
    Por que um canvas separado e não um objeto dentro da cena R3F?
    Desenhar o grão no mesmo framebuffer das partículas (que usam mistura
@@ -64,7 +64,7 @@ export function createGrain(canvas: HTMLCanvasElement, params: GrainParams) {
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
 
   const U = Object.fromEntries(
-    ['uTime', 'uRes', 'uPixelRatio', 'uMouse', 'uTint', 'uIntensity', 'uCenter'].map((n) => [n, gl.getUniformLocation(prog, n)]),
+    ['uTime', 'uRes', 'uPixelRatio', 'uMouse', 'uTint', 'uIntensity', 'uRadius'].map((n) => [n, gl.getUniformLocation(prog, n)]),
   );
 
   const mouse = { x: 0.2, y: 0.6, tx: 0.2, ty: 0.6 };
@@ -90,9 +90,12 @@ export function createGrain(canvas: HTMLCanvasElement, params: GrainParams) {
     gl!.uniform1f(U.uPixelRatio, 1);
     gl!.uniform2f(U.uMouse, mouse.x, mouse.y);
     gl!.uniform3fv(U.uTint, hex(params.tint));
-    // Celular: faixa encostada na borda e mais fraca (o texto ocupa a tela).
-    gl!.uniform1f(U.uIntensity, params.intensity * (w < 700 ? 0.7 : 1));
-    gl!.uniform1f(U.uCenter, w < 700 ? 0.08 : w < 1100 ? 0.14 : 0.2);
+    // Raio em alturas de tela, limitado pela largura: no celular em pé o
+    // círculo ocupa só a borda esquerda (~45% da largura) e fica mais fraco.
+    const aspect = w / innerHeight;
+    const radius = Math.min(w < 1100 ? 0.5 : 0.62, aspect * (w < 700 ? 0.7 : 0.55));
+    gl!.uniform1f(U.uIntensity, params.intensity * (w < 700 ? 0.75 : 1));
+    gl!.uniform1f(U.uRadius, radius);
     gl!.drawArrays(gl!.TRIANGLES, 0, 3);
   }
 

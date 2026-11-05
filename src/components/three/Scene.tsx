@@ -51,7 +51,7 @@ const DEFAULTS = {
   cursor: 1.2,
   opacidade: 0.5,
   brilho: 0.9,
-  grao: 0.6,
+  grao: 0.5,
   qualidade: 'auto',
   forma: 'auto',
 };

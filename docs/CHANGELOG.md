@@ -2,7 +2,7 @@
 
 ## 2.1.0 — 2026-11-05
 ### Adicionado
-- **Luz granulada** (inspirada no p5aholic): faixa de luz difusa feita de grão, do lado esquerdo, que se move devagar e reage de leve ao cursor.
+- **Luz granulada** (inspirada no p5aholic): **círculo** de luz feito de grão, cortado pela borda esquerda da tela. Tem sombreamento de esfera e aro claro, "respira" (raio pulsa de leve), flutua devagar e reage de leve ao cursor.
   - Fica em canvas WebGL próprio e leve: no celular, ~24 fps e intensidade menor.
   - No tema claro, o grão é escuro e mais discreto.
   - Ajuste "Luz granulada" no painel de calibração.
