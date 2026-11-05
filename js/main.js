@@ -1,6 +1,6 @@
 import {
   profile, skills, projects, lab, timeline, timelineTypes,
-  publications, awards, hiring, steps, faq,
+  publications, awards, hiring, steps, faq, education,
 } from './data.js';
 import { createField } from './field.js';
 import { createPanel } from './panel.js';
@@ -91,6 +91,22 @@ function render() {
         <ul class="tags">${t.tags.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
       </div>
       <span class="tl__type">${esc(timelineTypes.find((x) => x.id === t.type)?.label)}</span>
+    </li>`).join('');
+
+  const EDU = { concluido: 'Concluído', andamento: 'Em andamento' };
+  $('#edu').innerHTML = education.map((e) => `
+    <li class="edu__item">
+      <div class="edu__top">
+        <span class="edu__level">${esc(e.level)}</span>
+        <span class="edu__period">${esc(e.period)}</span>
+      </div>
+      <h4 class="edu__course">${esc(e.course)}</h4>
+      <p class="edu__org">${esc(e.org)}${e.load ? ` · ${esc(e.load)}` : ''}</p>
+      <p class="edu__work">${esc(e.work)}</p>
+      <div class="edu__foot">
+        <ul class="tags">${e.tags.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
+        <span class="status status--${e.status === 'andamento' ? 'experimento' : 'producao'}"><span class="led"></span>${EDU[e.status]}</span>
+      </div>
     </li>`).join('');
 
   $('#pubs').innerHTML = publications.map((p) => `

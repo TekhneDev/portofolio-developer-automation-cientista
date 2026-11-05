@@ -246,19 +246,46 @@ export const timeline = [
   },
   {
     type: 'pesquisa',
-    period: '2019 — 2021',
-    role: 'Pesquisadora',
-    org: 'Universidade Z',
+    period: '2021 — 2023',
+    role: 'Pesquisadora no mestrado',
+    org: 'Laboratório de Automação · Universidade Z',
     text: 'Modelagem e análise de dados experimentais, pipelines reprodutíveis em Python e publicação de resultados em periódicos e congressos.',
     tags: ['Python', 'Estatística', 'LaTeX'],
   },
+];
+
+/* Formação acadêmica — mais recente primeiro.
+   `level`: rótulo do grau. `status`: 'concluido' | 'andamento'. [EDITAR] */
+export const education = [
   {
-    type: 'pesquisa',
-    period: '2015 — 2019',
-    role: 'Graduação em Engenharia de Controle e Automação',
+    level: 'Pós-graduação lato sensu',
+    course: 'Especialização em Arquitetura de Software e DevOps',
+    org: 'Instituição W',
+    period: '2023 — 2024',
+    load: '420 h',
+    status: 'concluido',
+    work: 'TCC: arquitetura orientada a eventos para integrar sistemas legados de ERP a serviços em nuvem.',
+    tags: ['Microsserviços', 'Mensageria', 'Kubernetes', 'CI/CD'],
+  },
+  {
+    level: 'Mestrado',
+    course: 'Mestrado em Engenharia Elétrica — Automação e Sistemas',
     org: 'Universidade Z',
-    text: 'Trabalho de conclusão em controle preditivo aplicado a processos térmicos.',
-    tags: ['MATLAB', 'Controle', 'Instrumentação'],
+    period: '2021 — 2023',
+    load: 'Bolsista CAPES',
+    status: 'concluido',
+    work: 'Dissertação: detecção de anomalias em séries temporais industriais com redes neurais recorrentes, validada em dados reais de uma linha de produção.',
+    tags: ['Python', 'PyTorch', 'Séries temporais', 'Estatística'],
+  },
+  {
+    level: 'Graduação',
+    course: 'Bacharelado em Engenharia de Controle e Automação',
+    org: 'Universidade Z',
+    period: '2015 — 2020',
+    load: '4.200 h',
+    status: 'concluido',
+    work: 'TCC: controle preditivo baseado em modelo aplicado a processos térmicos, com protótipo em CLP e supervisório.',
+    tags: ['Controle', 'Instrumentação', 'CLP', 'MATLAB'],
   },
 ];
 
