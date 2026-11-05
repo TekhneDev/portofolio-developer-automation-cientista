@@ -10,6 +10,8 @@
      A forma-alvo vem de sceneState().morph, escrita pelo GSAP ScrollTrigger
      em scripts/motion.ts.
    - O cursor (ou o dedo) empurra as partículas.
+   - Atrás delas, uma "luz granulada" (inspirada no p5aholic): faixa de luz
+     difusa feita de grão fixo, do lado esquerdo, que se move devagar.
    - Painel "Calibração" (Leva) ajusta paleta, tamanho, velocidade etc.
      Abre pelo botão Calibrar / tecla C (evento cb:panel).
 
@@ -31,6 +33,7 @@ import { Leva, useControls, button } from 'leva';
 import * as THREE from 'three';
 import { sphere, network, wave, text } from './shapes';
 import { vertex, fragment } from './shaders';
+import { createGrain } from './grain';
 import { sceneState, EVT, emit } from '../../lib/bus';
 
 /* ---------- Configuração ---------- */
@@ -48,6 +51,7 @@ const DEFAULTS = {
   cursor: 1.2,
   opacidade: 0.5,
   brilho: 0.9,
+  grao: 0.6,
   qualidade: 'auto',
   forma: 'auto',
 };
@@ -217,6 +221,36 @@ function Particles({ count, cfg, light }: ParticlesProps) {
 }
 
 /* =========================================================================
+   GrainCanvas — luz granulada num <canvas> próprio, atrás das partículas
+   (ver grain.ts para o porquê de não ficar dentro da cena R3F).
+   ========================================================================= */
+function GrainCanvas({ cfg, light }: { cfg: typeof DEFAULTS; light: boolean }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const grain = useRef<ReturnType<typeof createGrain>>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    grain.current = createGrain(ref.current, { intensity: cfg.grao, speed: cfg.velocidade, tint: '#C9A7FF' });
+    return () => grain.current?.destroy();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Atualiza parâmetros sem recriar o contexto WebGL.
+  useEffect(() => {
+    const g = grain.current;
+    if (!g) return;
+    const cs = getComputedStyle(document.documentElement);
+    // No tema claro o grão é escuro sobre fundo claro: mais discreto para não brigar com o texto.
+    g.params.intensity = cfg.grao * (light ? 0.55 : 1);
+    g.params.speed = cfg.velocidade;
+    // Lilás claro no tema escuro; tinta (grafite-roxo) no claro.
+    g.params.tint = (light ? cs.getPropertyValue('--ink') : cs.getPropertyValue('--lilas')).trim() || '#C9A7FF';
+  }, [cfg.grao, cfg.velocidade, light]);
+
+  return <canvas ref={ref} className="scene__grain" aria-hidden="true" />;
+}
+
+/* =========================================================================
    MobileClock — no celular o Canvas usa frameloop="demand"; este relógio
    pede um quadro a cada ~33 ms (≈30 fps), economizando bateria e GPU.
    ========================================================================= */
@@ -247,6 +281,7 @@ function useCloudControls() {
     cursor: { label: 'Cursor', value: DEFAULTS.cursor, min: 0, max: 3, step: 0.05 },
     opacidade: { label: 'Opacidade', value: DEFAULTS.opacidade, min: 0.1, max: 1, step: 0.01 },
     brilho: { label: 'Brilho', value: DEFAULTS.brilho, min: 0, max: 3, step: 0.05 },
+    grao: { label: 'Luz granulada', value: DEFAULTS.grao, min: 0, max: 1.5, step: 0.05 },
     qualidade: { label: 'Qualidade', value: DEFAULTS.qualidade, options: { Automática: 'auto', Baixa: 'low', Média: 'mid', Alta: 'high' } },
     'Restaurar padrão': button(() => set(DEFAULTS)),
   }));
@@ -348,6 +383,7 @@ export default function Scene() {
         </div>,
       )}
 
+      <GrainCanvas cfg={cfg} light={light} />
       <Canvas
         className="scene__canvas"
         camera={{ position: [0, 0, 6], fov: 50 }}
@@ -358,7 +394,7 @@ export default function Scene() {
       >
         {/* Se o FPS cair, reduz a resolução; se cair muito, um nível de quantidade. */}
         <PerformanceMonitor
-          onChange={({ factor }) => setDpr(0.5 + 0.5 * factor)}
+          onChange={({ factor }) => setDpr(0.7 + 0.3 * factor)}   // piso de 70% da resolução
           onFallback={() => setAutoLevel('low')}
           onDecline={() => setAutoLevel((t) => TIERS[Math.max(0, TIERS.indexOf(t) - 1)])}
         />
@@ -367,7 +403,7 @@ export default function Scene() {
         {/* Bloom só no desktop, tema escuro e qualidade alta (é o efeito mais caro). */}
         {!mobile && !light && tier === 'high' && cfg.brilho > 0 && (
           <EffectComposer multisampling={0}>
-            <Bloom mipmapBlur intensity={cfg.brilho} luminanceThreshold={0.15} luminanceSmoothing={0.3} />
+            <Bloom mipmapBlur intensity={cfg.brilho} luminanceThreshold={0.42} luminanceSmoothing={0.3} />
           </EffectComposer>
         )}
       </Canvas>

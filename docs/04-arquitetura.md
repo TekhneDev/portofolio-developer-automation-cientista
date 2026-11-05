@@ -61,6 +61,12 @@ A cena **nunca** atrasa o texto: ela carrega por último e aparece com fade.
   - Celular: ~30 fps (`frameloop="demand"` + relógio próprio), sem bloom.
   - O painel vai por portal para `#calib-root`, porque a camada da cena fica atrás do conteúdo e não recebe cliques.
 - **`DataCloud.tsx`:** carrega a `Scene` de forma preguiçosa, depois que o navegador fica ocioso.
+- **`grain.ts`:** "luz granulada" (inspirada no p5aholic). É uma faixa de luz difusa à esquerda, feita de grão fixo, que se move devagar.
+  - Roda em **WebGL puro, num canvas próprio** atrás das partículas.
+  - Dentro da cena R3F, o grão dividia o framebuffer com a mistura aditiva e o bloom, e as partículas perdiam brilho.
+  - Custo: 1 triângulo, ruído de 3 oitavas e resolução de CSS (DPR 1). No celular roda a ~24 fps.
+  - Ajuste "Luz granulada" no painel.
+- **Partículas:** o tamanho mínimo é de 1,5 px. Quando o aparelho é fraco e a resolução cai, elas não somem.
 
 | Qualidade | Partículas | Quando |
 |---|---|---|

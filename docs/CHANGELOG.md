@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.1.0 — 2026-11-05
+### Adicionado
+- **Luz granulada** (inspirada no p5aholic): faixa de luz difusa feita de grão, do lado esquerdo, que se move devagar e reage de leve ao cursor.
+  - Fica em canvas WebGL próprio e leve: no celular, ~24 fps e intensidade menor.
+  - No tema claro, o grão é escuro e mais discreto.
+  - Ajuste "Luz granulada" no painel de calibração.
+  - Sem WebGL ou com movimento reduzido: grão estático em CSS.
+
+### Corrigido
+- As partículas podiam sumir quando o aparelho reduzia a resolução. Agora têm tamanho mínimo de 1,5 px, e a resolução não cai abaixo de 70%.
+
 ## 2.0.0 — 2026-11-05 (V2)
 ### Adicionado
 - Migração para **Astro 7** + TypeScript, com conteúdo em Content Collections: projetos em MDX, formação e trajetória em YAML, validados com Zod.
