@@ -148,6 +148,29 @@ kbd {
   transition: opacity 1.4s var(--ease);
 }
 .scene:has(canvas)::before { opacity: 0; }
+
+/* ---------- Átomo binário (estático) no centro do círculo granulado ----------
+   --gr = raio do círculo em px, igual a grain.ts: min(62% da altura, 55% da largura)
+   no desktop. O centro do círculo fica 0,35·R fora da tela; o átomo fica no meio
+   da parte visível (x = 0,3·R) e mede 0,42·R. */
+.atom {
+  --gr: min(62vh, 55vw);
+  position: absolute; z-index: 1; pointer-events: none;
+  width: calc(var(--gr) * 0.42); height: calc(var(--gr) * 0.42);
+  left: calc(var(--gr) * 0.3 - var(--gr) * 0.21);
+  top: calc(48% - var(--gr) * 0.21);
+  opacity: 0.32;
+  fill: var(--neon);
+  font-family: var(--f-mono);
+}
+.atom__orbit { font-size: 4px; letter-spacing: 0.4px; }
+.atom__electron { font-size: 7px; font-weight: 500; opacity: 1; }
+.atom__nucleus text { font-size: 4.2px; font-weight: 500; }
+.atom__orbit, .atom__nucleus { opacity: 0.75; }
+:root[data-theme="light"] .atom { fill: var(--neon-escuro); opacity: 0.34; }
+@media (max-width: 1099px) { .atom { --gr: min(50vh, 55vw); } }
+/* Celular: atrás do texto do hero → ainda mais discreto. */
+@media (max-width: 699px) { .atom { --gr: min(50vh, 70vw); opacity: 0.18; } }
 .scene__grain { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 2s var(--ease); }
 .is-ready .scene__canvas, .is-ready .scene__grain { opacity: 1; }
 

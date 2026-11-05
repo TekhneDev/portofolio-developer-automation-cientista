@@ -15,6 +15,7 @@ import { ClientRouter } from 'astro:transitions';
 import Sidebar from '../components/Sidebar.astro';
 import Footer from '../components/Footer.astro';
 import DataCloud from '../components/three/DataCloud.tsx';
+import Atom from '../components/Atom.astro';
 import { profile } from '../data/site';
 import { url } from '../lib/utils';
 import '../styles/global.css';
@@ -84,6 +85,7 @@ const ogImage = new URL(url('og.png'), Astro.site);
 
     <!-- Cena 3D atrás de todo o conteúdo -->
     <div class="scene" aria-hidden="true" transition:persist="scene">
+      <Atom />
       <DataCloud client:only="react" />
     </div>
     <!-- Painel de calibração: renderizado aqui via portal (fora da camada .scene,

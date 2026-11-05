@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.3.0 — 2026-11-05
+### Adicionado
+- **Átomo binário** estático no meio da parte visível do círculo granulado: três órbitas escritas com 0 e 1, elétrons em destaque e núcleo de dígitos.
+  - Verde neon discreto (opacidade 0.32; 0.18 no celular).
+  - SVG gerado no build, sem JavaScript.
+  - A posição acompanha o raio do círculo em qualquer tela.
+
 ## 2.2.0 — 2026-11-05
 ### Adicionado
 - **Ondas na luz granulada:** anéis concêntricos saem do centro do círculo e atravessam o grão, como ondulação na água. Os pontos se deslocam alguns pixels junto com a onda.

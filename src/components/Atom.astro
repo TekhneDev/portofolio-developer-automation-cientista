@@ -1,0 +1,51 @@
+---
+/* =========================================================================
+   Atom.astro — átomo estático feito de 0 e 1, dentro do círculo granulado
+   -------------------------------------------------------------------------
+   - Três órbitas elípticas (0°, 60°, 120°) escritas com texto binário
+     ao longo do caminho (<textPath>), um "elétron" (1 em destaque) em cada
+     órbita e um núcleo de dígitos no centro.
+   - 100% estático: SVG gerado no build, sem JavaScript e sem animação.
+   - Discreto: verde neon com opacidade baixa (ver .atom em global.css).
+   - A posição acompanha o círculo da luz granulada (mesma conta de
+     grain.ts, refeita em CSS com min(vh, vw)).
+   ========================================================================= */
+
+/** Sequência binária determinística (igual em todo build). */
+function bits(n: number, seed: number) {
+  let s = seed >>> 0, out = '';
+  for (let i = 0; i < n; i++) {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    out += s >>> 31 ? '1' : '0';
+    if (i % 4 === 3) out += ' ';
+  }
+  return out;
+}
+
+// Elipse centrada em (60,60), raios 50 × 17, desenhada como dois arcos.
+const orbit = 'M 10,60 a 50,17 0 1,0 100,0 a 50,17 0 1,0 -100,0';
+const angles = [0, 60, 120];
+// Núcleo: linhas curtas de dígitos empilhadas num círculo pequeno.
+const nucleus = ['101', '01101', '1001', '010'];
+---
+<svg class="atom" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+  <defs>
+    <path id="atom-orbit" d={orbit} />
+  </defs>
+
+  {angles.map((a, i) => (
+    <g transform={`rotate(${a} 60 60)`}>
+      <text class="atom__orbit">
+        <textPath href="#atom-orbit" startOffset="0">{bits(76, 7 + i * 13)}</textPath>
+      </text>
+      <!-- elétron: um "1" maior em um ponto da órbita -->
+      <text class="atom__electron" x={a === 60 ? 108 : a === 120 ? 14 : 60} y={a === 0 ? 45 : 62} text-anchor="middle">1</text>
+    </g>
+  ))}
+
+  <g class="atom__nucleus">
+    {nucleus.map((line, i) => (
+      <text x="60" y={54.5 + i * 4.2} text-anchor="middle">{line}</text>
+    ))}
+  </g>
+</svg>
