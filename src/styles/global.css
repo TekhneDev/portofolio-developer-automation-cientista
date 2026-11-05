@@ -641,15 +641,26 @@ a.lab__item:active, button.lab__item:active { border-color: var(--rosa); }
 /* O Leva usa estilo próprio; só garantimos que ele ocupe a largura do cartão. */
 .calib__body > div { position: static !important; width: 100% !important; }
 
-/* ---------- Cursor em anel (desktop com mouse; criado em motion.ts) ---------- */
+/* ---------- Cursor "foguete" (desktop com mouse; criado em rocket-cursor.ts) ----------
+   O JS move o elemento (transform) e redesenha o contorno; aqui só cores. */
 .cursor {
   position: fixed; left: 0; top: 0; z-index: 90; pointer-events: none;
-  width: 28px; height: 28px; margin: -14px 0 0 -14px;
-  border: 1.5px solid var(--lilas); border-radius: 50%;
-  opacity: 0; transition: width 0.3s var(--spring), height 0.3s var(--spring), margin 0.3s var(--spring), opacity 0.3s, background-color 0.3s;
+  width: 120px; height: 120px;
+  opacity: 0; transition: opacity 0.3s;
+  will-change: transform;
 }
-.has-cursor .cursor { opacity: 0.8; }
-.cursor.is-hot { width: 56px; height: 56px; margin: -28px 0 0 -28px; background: color-mix(in oklab, var(--rosa) 14%, transparent); border-color: var(--rosa); }
+.cursor svg { display: block; overflow: visible; }
+.has-cursor .cursor { opacity: 0.9; }
+.cursor__body {
+  fill: color-mix(in oklab, var(--neon) 8%, transparent);
+  stroke: var(--neon); stroke-width: 1.5; stroke-linejoin: round;
+  transition: fill 0.3s, stroke 0.3s;
+}
+.cursor__flame { fill: var(--rosa); }
+.cursor__spark { fill: var(--neon); }
+.cursor.is-hot .cursor__body { stroke: var(--rosa); fill: color-mix(in oklab, var(--rosa) 14%, transparent); }
+:root[data-theme="light"] .cursor__body { stroke: var(--neon-escuro); fill: color-mix(in oklab, var(--neon-escuro) 8%, transparent); }
+:root[data-theme="light"] .cursor__spark { fill: var(--neon-escuro); }
 .cursor.is-hidden { opacity: 0 !important; }
 
 /* =========================================================================

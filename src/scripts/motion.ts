@@ -13,7 +13,7 @@
    4. Sparklines se "desenham"; números de resultado contam de 0 até o valor
    5. Linha da trajetória cresce com o scroll (scrub)
    6. Forma da nuvem 3D segue a seção visível ([data-morph])
-   7. Desktop com mouse: cursor em anel + botões magnéticos
+   7. Desktop com mouse: cursor "foguete" + botões magnéticos
 
    Lenis (rolagem suave) só atua em roda do mouse/trackpad; no toque a
    rolagem continua nativa (melhor no celular).
@@ -24,6 +24,7 @@ import { SplitText } from 'gsap/SplitText';
 import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
 import { sceneState, EVT } from '../lib/bus';
+import { mountRocketCursor } from './rocket-cursor';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -59,27 +60,23 @@ if (!reduce) {
 }
 
 /* =========================================================================
-   Cursor em anel (só desktop com mouse). Listeners globais, criados uma vez.
+   Cursor "foguete" (só desktop com mouse): anel que estica na direção do
+   movimento e vira foguete com a velocidade. Ver rocket-cursor.ts.
    ========================================================================= */
 if (finePointer && !reduce) {
-  const ring = document.querySelector<HTMLElement>('.cursor');
-  if (ring) {
+  const host = document.querySelector<HTMLElement>('.cursor');
+  if (host) {
     root.classList.add('has-cursor');
-    ring.classList.add('is-hidden'); // só aparece no primeiro movimento do mouse
-    const x = gsap.quickTo(ring, 'x', { duration: 0.35, ease: 'power3' });
-    const y = gsap.quickTo(ring, 'y', { duration: 0.35, ease: 'power3' });
+    host.classList.add('is-hidden'); // só aparece no primeiro movimento do mouse
+    mountRocketCursor(host);
     window.addEventListener('pointermove', (e) => {
-      if (e.pointerType !== 'mouse') return;
-      ring.classList.remove('is-hidden');
-      x(e.clientX); y(e.clientY);
+      if (e.pointerType === 'mouse') host.classList.remove('is-hidden');
     }, { passive: true });
-    // Cresce sobre elementos clicáveis.
     document.addEventListener('pointerover', (e) => {
-      const hot = (e.target as HTMLElement).closest('a, button, summary, label, [data-magnetic]');
-      ring.classList.toggle('is-hot', !!hot);
+      host.classList.toggle('is-hot', !!(e.target as HTMLElement).closest('a, button, summary, label, [data-magnetic]'));
     });
-    document.addEventListener('pointerleave', () => ring.classList.add('is-hidden'));
-    document.addEventListener('pointerenter', () => ring.classList.remove('is-hidden'));
+    document.addEventListener('pointerleave', () => host.classList.add('is-hidden'));
+    document.addEventListener('pointerenter', () => host.classList.remove('is-hidden'));
   }
 }
 

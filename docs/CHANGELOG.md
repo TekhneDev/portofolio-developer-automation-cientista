@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.4.0 — 2026-11-05
+### Adicionado
+- **Cursor "foguete"** (desktop com mouse). Parado é um anel. Em movimento, estica na direção do mouse: bico redondo, corpo alongado e, em alta velocidade, aletas na cauda, rastro de propulsão rosa e uma faísca verde.
+  - A intensidade acompanha a velocidade.
+  - Sobre links, o anel cresce e fica rosa.
+  - Só SVG + transform, sem reflow. Desligado no toque e com movimento reduzido.
+
 ## 2.3.0 — 2026-11-05
 ### Adicionado
 - **Átomo binário** estático no meio da parte visível do círculo granulado: três órbitas escritas com 0 e 1, elétrons em destaque e núcleo de dígitos.
