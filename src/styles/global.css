@@ -642,25 +642,28 @@ a.lab__item:active, button.lab__item:active { border-color: var(--rosa); }
 .calib__body > div { position: static !important; width: 100% !important; }
 
 /* ---------- Cursor "foguete" (desktop com mouse; criado em rocket-cursor.ts) ----------
-   O JS move o elemento (transform) e redesenha o contorno; aqui só cores. */
+   O JS move o elemento (transform) e redesenha o contorno. O foguete usa as
+   cores do site; só a chama tem cores de fogo (gradientes no próprio SVG). */
 .cursor {
   position: fixed; left: 0; top: 0; z-index: 90; pointer-events: none;
-  width: 120px; height: 120px;
+  width: 140px; height: 140px;
   opacity: 0; transition: opacity 0.3s;
   will-change: transform;
 }
 .cursor svg { display: block; overflow: visible; }
-.has-cursor .cursor { opacity: 0.9; }
+.has-cursor .cursor { opacity: 0.92; }
 .cursor__body {
   fill: color-mix(in oklab, var(--neon) 8%, transparent);
   stroke: var(--neon); stroke-width: 1.5; stroke-linejoin: round;
   transition: fill 0.3s, stroke 0.3s;
 }
-.cursor__flame { fill: var(--rosa); }
-.cursor__spark { fill: var(--neon); }
+.cursor__window { fill: none; stroke: var(--neon); stroke-width: 1.2; }
+.cursor__fire { fill: url(#cb-fire); }
+.cursor__fire-core { fill: url(#cb-fire-core); }
+.cursor__ember { fill: #FFB43B; }
 .cursor.is-hot .cursor__body { stroke: var(--rosa); fill: color-mix(in oklab, var(--rosa) 14%, transparent); }
 :root[data-theme="light"] .cursor__body { stroke: var(--neon-escuro); fill: color-mix(in oklab, var(--neon-escuro) 8%, transparent); }
-:root[data-theme="light"] .cursor__spark { fill: var(--neon-escuro); }
+:root[data-theme="light"] .cursor__window { stroke: var(--neon-escuro); }
 .cursor.is-hidden { opacity: 0 !important; }
 
 /* =========================================================================

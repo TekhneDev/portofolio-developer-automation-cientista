@@ -1,138 +1,184 @@
 /* =========================================================================
-   rocket-cursor.ts — Cursor que vira "foguete" conforme a velocidade
+   rocket-cursor.ts — Cursor que vira um foguete quando o mouse se move
    -------------------------------------------------------------------------
-   Parado: um anel. Em movimento, o anel se deforma na direção do mouse:
-   - a FRENTE continua arredondada (o bico);
-   - a TRASEIRA estica e afina (o corpo);
-   - perto da cauda surgem duas ALETAS;
-   - atrás aparece uma pequena PROPULSÃO (3 pontos tremulando) e uma
-     FAÍSCA de 4 pontas.
-   Quanto mais rápido o mouse, mais forte a deformação ("intensidade").
+   Parado: um anel. Em movimento, o anel se TRANSFORMA (morph ponto a ponto)
+   no contorno de um foguete — bico cônico, corpo, aletas e bocal — que
+   aponta para a direção do movimento. Uma janelinha aparece no corpo.
+   Atrás do bocal sai uma CHAMA com cores de fogo (amarelo → laranja →
+   vermelho) que tremula e cresce com a velocidade, mais algumas brasas.
+   O foguete mantém as cores do site; só a chama é "fogo".
 
    Como funciona:
-   - O contorno é uma curva polar r(θ) com 56 pontos, onde θ = 0 aponta
-     para a direção do movimento. A deformação é uma soma de termos em
-     cos θ controlados pela velocidade suavizada `s` (0..1).
-   - A cada quadro (gsap.ticker) recalculamos o atributo `d` do <path> e
-     giramos o grupo para a direção do movimento. Nada de layout/reflow:
-     só transform + atributo SVG.
+   - O contorno do foguete é um polígono (frente = +x) reamostrado em
+     N pontos igualmente espaçados pelo perímetro, começando no bico.
+   - O círculo tem os mesmos N pontos, começando em θ = 0 e no mesmo
+     sentido. Interpolamos ponto a ponto: 0 = círculo, 1 = foguete.
+   - A intensidade `s` vem da velocidade suavizada do ponteiro.
+   - Tudo em SVG + transform, atualizado no gsap.ticker (sem reflow).
    - Só em desktop com mouse e sem "movimento reduzido" (quem chama decide).
    ========================================================================= */
 import gsap from 'gsap';
 
 const NS = 'http://www.w3.org/2000/svg';
-const SIZE = 120;            // área do SVG (px); o anel tem raio R0 no centro
+const SIZE = 140;           // área do SVG (px)
 const C = SIZE / 2;
-const R0 = 14;               // raio do anel parado
-const POINTS = 56;
+const R0 = 14;              // raio do anel parado
+const N = 96;               // pontos do contorno
+const K = R0 * 1.15;        // escala do foguete (unidades → px)
+
+/* Contorno do foguete em unidades (frente = +x), sentido: do bico para y<0. */
+const ROCKET: [number, number][] = [
+  [1.6, 0], [1.42, -0.15], [1.2, -0.28], [0.95, -0.37], [0.7, -0.42],     // bico (cone)
+  [-0.72, -0.42],                                                           // corpo
+  [-0.78, -0.46], [-1.12, -0.88], [-1.42, -0.9], [-1.22, -0.42],            // aleta de cima
+  [-1.22, -0.3], [-1.36, -0.25], [-1.36, 0.25], [-1.22, 0.3],               // bocal
+  [-1.22, 0.42], [-1.42, 0.9], [-1.12, 0.88], [-0.78, 0.46],                // aleta de baixo
+  [-0.72, 0.42], [0.7, 0.42], [0.95, 0.37], [1.2, 0.28], [1.42, 0.15],      // corpo + bico
+];
+const NOZZLE_X = -1.36 * K;   // fim do bocal (onde nasce a chama)
+
+/** Reamostra um polígono fechado em `n` pontos igualmente espaçados no perímetro. */
+function resample(poly: [number, number][], n: number): [number, number][] {
+  const pts = [...poly, poly[0]];
+  const seg = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]));
+  const total = seg.reduce((a, b) => a + b, 0);
+  const out: [number, number][] = [];
+  let j = 0, acc = 0;
+  for (let i = 0; i < n; i++) {
+    const d = (i / n) * total;
+    while (acc + seg[j] < d) { acc += seg[j]; j++; }
+    const t = (d - acc) / seg[j];
+    out.push([pts[j][0] + (pts[j + 1][0] - pts[j][0]) * t, pts[j][1] + (pts[j + 1][1] - pts[j][1]) * t]);
+  }
+  return out;
+}
+
+const rocketPts = resample(ROCKET, N).map(([x, y]) => [x * K, y * K]);
+// Círculo com os mesmos N pontos, começando em +x e indo para y<0 (mesmo sentido).
+const circlePts = Array.from({ length: N }, (_, i) => {
+  const a = -(i / N) * Math.PI * 2;
+  return [Math.cos(a) * R0, Math.sin(a) * R0];
+});
+
+const smooth = (e0: number, e1: number, x: number) => {
+  const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)));
+  return t * t * (3 - 2 * t);
+};
 
 export function mountRocketCursor(host: HTMLElement) {
-  host.innerHTML = '';
-  const svg = document.createElementNS(NS, 'svg');
-  svg.setAttribute('viewBox', `0 0 ${SIZE} ${SIZE}`);
-  svg.setAttribute('width', String(SIZE));
-  svg.setAttribute('height', String(SIZE));
+  host.innerHTML = `
+    <svg viewBox="0 0 ${SIZE} ${SIZE}" width="${SIZE}" height="${SIZE}">
+      <defs>
+        <!-- Chama: amarelo no bocal → laranja → vermelho na ponta -->
+        <linearGradient id="cb-fire" x1="1" y1="0" x2="0" y2="0">
+          <stop offset="0" stop-color="#FFF3A6"/>
+          <stop offset="0.35" stop-color="#FFB43B"/>
+          <stop offset="0.75" stop-color="#FF5A2A"/>
+          <stop offset="1" stop-color="#FF2E5B" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="cb-fire-core" x1="1" y1="0" x2="0" y2="0">
+          <stop offset="0" stop-color="#FFFFFF"/>
+          <stop offset="0.5" stop-color="#FFE36E"/>
+          <stop offset="1" stop-color="#FFB43B" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <g class="cursor__rocket">
+        <path class="cursor__fire"/>
+        <path class="cursor__fire-core"/>
+        <circle class="cursor__ember"/><circle class="cursor__ember"/><circle class="cursor__ember"/>
+        <path class="cursor__body"/>
+        <circle class="cursor__window"/>
+      </g>
+    </svg>`;
 
-  const g = document.createElementNS(NS, 'g');           // girado na direção do movimento
-  const body = document.createElementNS(NS, 'path');     // contorno do foguete
-  body.setAttribute('class', 'cursor__body');
-  const flames = [0, 1, 2].map(() => {
-    const c = document.createElementNS(NS, 'circle');
-    c.setAttribute('class', 'cursor__flame');
-    g.appendChild(c);
-    return c;
-  });
-  const spark = document.createElementNS(NS, 'path');    // faísca de 4 pontas
-  spark.setAttribute('class', 'cursor__spark');
-  spark.setAttribute('d', 'M0,-5 L1.2,-1.2 L5,0 L1.2,1.2 L0,5 L-1.2,1.2 L-5,0 L-1.2,-1.2 Z');
-  g.append(body, spark);
-  svg.appendChild(g);
-  host.appendChild(svg);
+  const g = host.querySelector<SVGGElement>('.cursor__rocket')!;
+  const body = host.querySelector<SVGPathElement>('.cursor__body')!;
+  const fire = host.querySelector<SVGPathElement>('.cursor__fire')!;
+  const core = host.querySelector<SVGPathElement>('.cursor__fire-core')!;
+  const win = host.querySelector<SVGCircleElement>('.cursor__window')!;
+  const embers = [...host.querySelectorAll<SVGCircleElement>('.cursor__ember')];
+  const emberLife = embers.map((_, i) => ({ t: i / embers.length, y: 0 }));
 
   /* --- Estado --- */
-  const pos = { x: -200, y: -200 };      // posição desenhada (persegue o mouse)
-  const target = { x: -200, y: -200 };
-  let vx = 0, vy = 0;                     // velocidade suavizada (px/quadro)
-  let angle = 0;                          // direção (rad)
-  let s = 0;                              // intensidade 0..1
-  let hot = 0, hotTarget = 0;             // sobre link/botão: anel cresce
-  let t = 0;
+  const pos = { x: -300, y: -300 };
+  const target = { x: -300, y: -300 };
+  let vx = 0, vy = 0, angle = 0, s = 0, hot = 0, hotTarget = 0, t = 0;
 
   window.addEventListener('pointermove', (e) => {
     if (e.pointerType !== 'mouse') return;
     target.x = e.clientX; target.y = e.clientY;
-    if (pos.x < -100) { pos.x = target.x; pos.y = target.y; } // primeira aparição sem "voo"
+    if (pos.x < -200) { pos.x = target.x; pos.y = target.y; }
   }, { passive: true });
 
   document.addEventListener('pointerover', (e) => {
     hotTarget = (e.target as HTMLElement).closest('a, button, summary, label, [data-magnetic]') ? 1 : 0;
   });
 
-  /** Raio do contorno no ângulo θ (θ = 0 → frente). */
-  function radius(theta: number) {
-    const c = Math.cos(theta);
-    const back = Math.max(0, -c);                         // 0 na frente, 1 atrás
-    const stretch = 1 + s * 2.1 * back ** 2.2;           // corpo alongado
-    const squeeze = 1 - s * 0.3 * Math.sin(theta) ** 2;   // afina dos lados
-    // Aletas: dois "bicos" perto da cauda (θ ≈ ±145°).
-    const fin = s * 0.55 * (Math.exp(-((Math.abs(theta) - 2.55) ** 2) / 0.012));
-    return R0 * (1 + hot * 0.7) * stretch * squeeze + R0 * fin;
-  }
-
-  function shape() {
-    let d = '';
-    for (let i = 0; i <= POINTS; i++) {
-      const th = -Math.PI + (i / POINTS) * Math.PI * 2;
-      const r = radius(th);
-      // θ = 0 aponta para +x (direita); o grupo é girado depois.
-      const x = C + Math.cos(th) * r;
-      const y = C + Math.sin(th) * r;
-      d += `${i ? 'L' : 'M'}${x.toFixed(2)},${y.toFixed(2)}`;
-    }
-    return d + 'Z';
+  /** Chama: gota que sai do bocal para trás; comprimento e ponta tremulam. */
+  function flamePath(len: number, half: number, wob: number) {
+    const x0 = C + NOZZLE_X + 1, x1 = x0 - len;
+    return `M${x0},${C - half} C${x0 - len * 0.35},${C - half * 1.5} ${x1 + len * 0.2},${C - half * 0.5 + wob} ${x1},${C + wob}`
+      + ` C${x1 + len * 0.2},${C + half * 0.5 + wob} ${x0 - len * 0.35},${C + half * 1.5} ${x0},${C + half} Z`;
   }
 
   gsap.ticker.add((_, deltaMs) => {
-    const k = Math.min(deltaMs / 16.7, 3);               // normaliza por 60 fps
+    const k = Math.min(deltaMs / 16.7, 3);
     t += deltaMs / 1000;
 
-    // Segue o mouse com atraso suave.
+    // Segue o mouse com atraso suave e mede a velocidade.
     const px = pos.x, py = pos.y;
     pos.x += (target.x - pos.x) * Math.min(1, 0.28 * k);
     pos.y += (target.y - pos.y) * Math.min(1, 0.28 * k);
     const dx = (pos.x - px) / k, dy = (pos.y - py) / k;
-
     vx += (dx - vx) * 0.25; vy += (dy - vy) * 0.25;
     const speed = Math.hypot(vx, vy);
-    s += (Math.min(speed / 11, 1) - s) * 0.2;            // ~11 px/quadro = intensidade máxima
+    s += (Math.min(speed / 11, 1) - s) * 0.2;
     if (speed > 0.6) {
-      // Gira pelo caminho mais curto (evita "piruetas" ao cruzar ±180°).
       const a = Math.atan2(vy, vx);
-      let diff = a - angle;
-      diff = Math.atan2(Math.sin(diff), Math.cos(diff));
-      angle += diff * 0.25;
+      angle += Math.atan2(Math.sin(a - angle), Math.cos(a - angle)) * 0.25;
     }
     hot += (hotTarget - hot) * 0.15;
 
-    body.setAttribute('d', shape());
-    g.setAttribute('transform', `rotate(${(angle * 180) / Math.PI} ${C} ${C})`);
+    // Morph círculo → foguete.
+    const m = smooth(0.08, 0.5, s);
+    const scale = 1 + hot * 0.6 * (1 - m);           // sobre links o anel cresce
+    let d = '';
+    for (let i = 0; i < N; i++) {
+      const x = C + (circlePts[i][0] * (1 - m) + rocketPts[i][0] * m) * scale;
+      const y = C + (circlePts[i][1] * (1 - m) + rocketPts[i][1] * m) * scale;
+      d += `${i ? 'L' : 'M'}${x.toFixed(2)},${y.toFixed(2)}`;
+    }
+    body.setAttribute('d', d + 'Z');
 
-    // Propulsão: 3 pontos atrás da cauda, tremulando; somem quando parado.
-    const tail = R0 * (1 + s * 2.1);
-    flames.forEach((f, i) => {
-      const off = tail + 5 + i * 6 + Math.sin(t * 30 + i * 2) * 1.5 * s;
-      f.setAttribute('cx', (C - off).toFixed(2));
-      f.setAttribute('cy', (C + Math.sin(t * 22 + i) * 1.2 * s).toFixed(2));
-      f.setAttribute('r', ((2.2 - i * 0.55) * (0.4 + s)).toFixed(2));
-      f.style.opacity = String(Math.max(0, s - 0.15 - i * 0.12) * 1.4);
+    // Janelinha do foguete.
+    win.setAttribute('cx', (C + 0.38 * K * m).toFixed(2));
+    win.setAttribute('cy', String(C));
+    win.setAttribute('r', (0.17 * K * m).toFixed(2));
+    win.style.opacity = String(m);
+
+    // Chama de fogo: cresce com a velocidade e tremula (duas camadas).
+    const fl = Math.max(0, s - 0.15) / 0.85;
+    const flick = 0.75 + 0.25 * Math.sin(t * 38) * Math.sin(t * 23 + 1.3);
+    const len = K * (0.5 + 1.9 * fl) * flick;
+    const wob = Math.sin(t * 31) * 1.6 * fl;
+    fire.setAttribute('d', flamePath(len, 0.27 * K, wob));
+    core.setAttribute('d', flamePath(len * 0.55, 0.15 * K, wob * 0.6));
+    fire.style.opacity = String(Math.min(1, fl * 1.6) * m);
+    core.style.opacity = String(Math.min(1, fl * 1.8) * m);
+
+    // Brasas: saem do bocal, derivam para trás e apagam.
+    embers.forEach((e, i) => {
+      const life = emberLife[i];
+      life.t += (deltaMs / 1000) * (1.6 + i * 0.4);
+      if (life.t > 1) { life.t = 0; life.y = (Math.random() - 0.5) * 0.5 * K; }
+      const ex = C + NOZZLE_X - len * 0.6 - life.t * K * 1.6;
+      e.setAttribute('cx', ex.toFixed(2));
+      e.setAttribute('cy', (C + life.y + Math.sin(t * 9 + i) * 1.2).toFixed(2));
+      e.setAttribute('r', (1.3 * (1 - life.t) + 0.3).toFixed(2));
+      e.style.opacity = String(Math.max(0, fl - 0.2) * (1 - life.t) * m);
     });
 
-    // Faísca: aparece com velocidade alta, girando de leve.
-    const sp = Math.max(0, s - 0.45) * 1.8;
-    spark.setAttribute('transform',
-      `translate(${(C - tail - 26).toFixed(2)} ${(C - 6).toFixed(2)}) rotate(${(t * 90) % 360}) scale(${(0.6 + sp * 0.6).toFixed(2)})`);
-    spark.style.opacity = String(Math.min(1, sp));
-
+    g.setAttribute('transform', `rotate(${(angle * 180) / Math.PI} ${C} ${C})`);
     host.style.transform = `translate3d(${pos.x - C}px, ${pos.y - C}px, 0)`;
   });
 }

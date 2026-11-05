@@ -80,9 +80,9 @@ A cena **nunca** atrasa o texto: ela carrega por último e aparece com fade.
 - SplitText com máscara no nome (por letra) e nos títulos (por palavra).
 - Contadores leem o número do texto ("−95%", "0,3%", "12 mil") e preservam prefixo, sufixo e vírgula.
 - **Cursor "foguete"** (`src/scripts/rocket-cursor.ts`):
-  - O contorno é uma curva polar r(θ), com 56 pontos, recalculada a cada quadro a partir da velocidade suavizada.
+  - O círculo e o contorno do foguete (um polígono reamostrado) têm os mesmos 96 pontos, interpolados ponto a ponto conforme a velocidade suavizada.
   - O grupo gira para a direção do movimento.
-  - Propulsão e faísca aparecem acima de certa velocidade.
+  - A chama usa gradientes de fogo, com duas camadas tremulando e brasas.
 - Com "movimento reduzido": nenhuma animação, nenhum Lenis e nenhuma cena 3D.
 
 ## Conteúdo
