@@ -103,6 +103,9 @@ void main() {
       com a borda levemente mais clara.
    2. Animação leve: o raio "respira" e o centro flutua alguns pixels;
       uma névoa (ruído de 3 oitavas) desliza devagar por dentro.
+   2b. ONDAS: anéis concêntricos saem do centro e atravessam o círculo,
+      como ondulação na água. Eles adensam o grão nas cristas e deslocam
+      os pontos alguns pixels na direção da onda (o grão "escorre" junto).
    3. Grão: cada pixel compara a luz com um número aleatório FIXO daquele
       pixel (pontilhismo). O grão não pisca — só a luz se move.
    Distâncias em "alturas de tela" (corrige a proporção), então o círculo
@@ -154,15 +157,21 @@ void main() {
   // Disco com borda suave (1 = dentro, 0 = fora).
   float disc = 1.0 - smoothstep(R - 0.035, R + 0.005, dist);
 
+  // Ondas concêntricas indo para fora. Um leve "tremor" angular deixa os
+  // anéis orgânicos em vez de perfeitamente circulares.
+  float ang = atan(d.y, d.x);
+  float phase = dist * 38.0 - t * 1.6 + 0.35 * sin(ang * 5.0 + t * 0.4);
+  float crest = pow(0.5 + 0.5 * sin(phase), 3.0);     // cristas mais finas
+
   // Sombreamento de esfera: mais luz no lado de cima/direita, aro claro.
   vec2 n = d / R;
   float lit = clamp(dot(n, normalize(vec2(0.75, 0.55))), 0.0, 1.0);
   float rim = smoothstep(0.7, 1.0, dist / R);
-  float shade = 0.18 + 0.55 * lit + 0.35 * rim;
+  float shade = 0.32 + 0.45 * lit + 0.3 * rim;
 
   // Névoa deslizando por dentro do círculo.
   float fog = fbm(q * 2.2 + vec2(t * 0.02, -t * 0.015));
-  float light = disc * shade * (0.55 + 0.6 * fog);
+  float light = disc * shade * (0.55 + 0.6 * fog) * (0.25 + 1.45 * crest);
 
   // Leve reforço perto do cursor (só dentro do círculo).
   vec2 m = (uv - uMouse) * vec2(aspect, 1.0);
@@ -171,10 +180,13 @@ void main() {
   light = clamp(light * uIntensity, 0.0, 1.0);
 
   // Grão: pontos acesos onde o aleatório fixo do pixel é menor que a luz.
-  float g = hash(floor(gl_FragCoord.xy / uPixelRatio));
-  float dotOn = step(g, light * light * 0.9);
+  // Dentro do círculo o padrão do grão é deslocado até ~3 px na direção
+  // radial, acompanhando a onda — os pontos parecem ondular.
+  vec2 push = (d / max(dist, 1e-4)) * sin(phase) * 3.0 * disc;
+  float g = hash(floor((gl_FragCoord.xy / uPixelRatio) + push));
+  float dotOn = step(g, light * light * 0.95);
 
-  float alpha = dotOn * 0.38 + light * 0.04;    // grão + véu bem fraco
+  float alpha = dotOn * 0.5 + light * 0.05;     // grão + véu bem fraco
   gl_FragColor = vec4(uTint, alpha);
 }
 `;

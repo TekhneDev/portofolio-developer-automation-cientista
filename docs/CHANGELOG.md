@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.2.0 — 2026-11-05
+### Adicionado
+- **Ondas na luz granulada:** anéis concêntricos saem do centro do círculo e atravessam o grão, como ondulação na água. Os pontos se deslocam alguns pixels junto com a onda.
+- O efeito ficou mais visível: intensidade padrão 0.7 e grão mais denso nas cristas.
+
 ## 2.1.0 — 2026-11-05
 ### Adicionado
 - **Luz granulada** (inspirada no p5aholic): **círculo** de luz feito de grão, cortado pela borda esquerda da tela. Tem sombreamento de esfera e aro claro, "respira" (raio pulsa de leve), flutua devagar e reage de leve ao cursor.
