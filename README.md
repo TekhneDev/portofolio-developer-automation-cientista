@@ -1,45 +1,67 @@
 # Carla Braga — Portfólio
 
-Portfólio de desenvolvedora full stack. HTML, CSS e JavaScript puros (ES modules), fundo em WebGL2/GLSL escrito à mão. Sem build e sem dependências.
+Portfólio de desenvolvedora full stack, com formação em ciência e engenharia de automação.
 
-## Documentação
-
-Ideação, decisões, design system, arquitetura, roadmap V2 e guia mobile ficam em [`docs/`](docs/README.md).
+**Stack:** Astro 7 · React 19 · TypeScript · three.js + React Three Fiber + drei + postprocessing · Leva · GSAP (ScrollTrigger, SplitText) · Lenis · MDX + Content Collections · Playwright · GitHub Actions.
 
 ## Rodar localmente
 
-Módulos ES precisam de servidor HTTP (abrir o arquivo direto não funciona):
+Requer Node.js 22 ou mais novo.
 
 ```bash
-python3 -m http.server 8000
-# abra http://localhost:8000
+npm install
+npm run dev        # http://localhost:4321/portofolio-developer-automation-cientista/
+npm run build      # gera o site estático em dist/
+npm run preview    # serve o dist/ para conferir o build
+npm test           # build + testes em 6 tamanhos de tela (360 → 1920)
 ```
+
+Para testar no celular, na mesma rede Wi-Fi: `npm run dev -- --host` e abra o endereço "Network" que aparecer.
+
+## Onde editar o conteúdo
+
+| O quê | Arquivo |
+|---|---|
+| Projetos (um arquivo por projeto, com estudo de caso) | `src/content/projetos/*.mdx` |
+| Formação | `src/content/formacao.yaml` |
+| Trajetória profissional | `src/content/trajetoria.yaml` |
+| Perfil, contato, competências, lab, publicações, prêmios, CLT/PJ, FAQ | `src/data/site.ts` |
+| Currículo em PDF | `public/curriculo-carla-braga.pdf` |
+
+Procure por `[EDITAR]`. Os campos são validados no build: se faltar algo obrigatório, o build avisa qual arquivo e qual campo.
+
+**Novo projeto:** copie um `.mdx` de `src/content/projetos/`, troque o nome do arquivo (ele vira a URL) e edite.
 
 ## Estrutura
 
 ```
-index.html      estrutura e seções
-css/style.css   tokens de cor/tipo, layout e responsividade
-js/data.js      TODO o conteúdo editável
-js/main.js      renderização, navegação, overlay, filtro, preferências, som
-js/field.js     shader do fundo (campo de fluxo)
-js/panel.js     painel de calibração (botão "Calibrar" ou tecla C)
+src/
+  components/
+    sections/   Hero, Projects, Lab, Trajectory, Hiring, Contact
+    three/      DataCloud (carregador leve), Scene (R3F + Leva), shapes, shaders
+    ui/         Tags, Status, Sparkline, SectionHead
+    Sidebar.astro, Footer.astro
+  content/      projetos/*.mdx, formacao.yaml, trajetoria.yaml
+  content.config.ts   schemas (Zod) das coleções
+  data/site.ts        conteúdo fixo
+  layouts/Base.astro  <head>, View Transitions, cena 3D, scripts
+  lib/                utils (url, sparkline), bus (comunicação entre ilhas)
+  pages/              index.astro, projetos/[slug].astro
+  scripts/            ui.ts (menu, preferências, filtro) · motion.ts (GSAP + Lenis)
+  styles/global.css   design system + responsivo
+tests/site.spec.ts    Playwright
+docs/                 ideação, design system, arquitetura, roadmap, mobile
 ```
 
-## O que editar
+## Publicação
 
-Tudo fica em `js/data.js`. Procure por `[EDITAR]`:
+Cada push na `main` publica no GitHub Pages (`.github/workflows/deploy.yml`).
+É preciso ativar uma vez em **Settings → Pages → Source: GitHub Actions**.
 
-- `profile`: e-mail, WhatsApp (só dígitos, com DDI e DDD), cidade, LinkedIn e caminho do currículo
-- `projects`: troque os exemplos por projetos reais. Mantenha o formato problema → solução → resultado medido
-- `timeline`, `publications`, `awards`: empresas, instituições, datas e links reais
-- Currículo: coloque o PDF em `assets/curriculo-carla-braga.pdf`
+Endereço: https://tekhnedev.github.io/portofolio-developer-automation-cientista/
 
-## Recursos
+Para domínio próprio ou Vercel, rode o build com `BASE_PATH=/` e `SITE_URL=https://seu-dominio`.
 
-- Layout em 2 colunas no desktop, header fixo no tablet e menu em tela cheia no celular
-- Tema claro/escuro, fonte monoespaçada e som (desligado por padrão), salvos no navegador
-- Filtro da trajetória por área (Desenvolvimento, Automação, Pesquisa)
-- Projetos abrem em overlay com contexto, stack e métricas
-- `prefers-reduced-motion` desliga o fundo e as animações
-- Foco visível, link "pular para o conteúdo", alvos de toque de 44px
+## Documentação
+
+Ideação, decisões, design system, arquitetura, roadmap e guia mobile ficam em [`docs/`](docs/README.md).

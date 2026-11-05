@@ -1,6 +1,13 @@
 # 07 · Guia de conteúdo
 
-Todo texto fica em `js/data.js`. Procure por `[EDITAR]`.
+| O quê | Onde |
+|---|---|
+| Projetos | `src/content/projetos/*.mdx` (frontmatter + texto do estudo de caso) |
+| Formação | `src/content/formacao.yaml` |
+| Trajetória | `src/content/trajetoria.yaml` |
+| Perfil, contato, competências, lab, publicações, CLT/PJ, FAQ | `src/data/site.ts` |
+
+Procure por `[EDITAR]`. O build valida os campos e avisa se faltar algum.
 
 ## Projetos: a fórmula
 
@@ -8,7 +15,7 @@ Recrutador e cliente PJ querem saber três coisas: **qual era o problema, o que 
 
 | Campo | Como escrever | Exemplo |
 |---|---|---|
-| `title` | 2 a 4 palavras. Use `\n` para quebrar a linha | `'Orquestrador\nde Automações'` |
+| `title` | 2 a 4 palavras. Use `\n` (entre aspas duplas) para quebrar a linha | `"Orquestrador\nde Automações"` |
 | `role` | Seu papel + área | `'Back-end · automação'` |
 | `client` | Setor + "(confidencial)", se não puder citar o nome | `'Indústria de alimentos (confidencial)'` |
 | `metric` | **Um** número que resume o impacto | `{ value: '−40 h/mês', label: 'trabalho manual eliminado' }` |
@@ -29,6 +36,10 @@ Recrutador e cliente PJ querem saber três coisas: **qual era o problema, o que 
 Se não houver número exato, use uma estimativa honesta com "~" (`~30 h/mês`). Nunca invente.
 
 **Verbos fortes:** desenhei, implementei, migrei, automatizei, reduzi, integrei, liderei, padronizei.
+
+**Texto do estudo de caso:** abaixo do frontmatter, escreva em Markdown com `## Contexto`, `## Decisões técnicas` e `## O que aprendi`. Aparece na página `/projetos/<nome-do-arquivo>`.
+
+**Novo projeto:** copie um `.mdx`. O nome do arquivo vira a URL. Ajuste `order` para definir a posição na lista.
 
 ## Trajetória
 

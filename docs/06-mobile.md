@@ -44,11 +44,13 @@ O mobile é prioridade: a maior parte dos recrutadores abre o link do portfólio
 - Títulos de projeto também seguem a largura da lista (`cqi`, container query), então palavras longas como "ORQUESTRADOR" cabem em 360 px.
 - `overflow-wrap: break-word` em textos, para URL ou nome longo não estourar.
 
-**Desempenho**
-- Fundo WebGL com 50% da resolução e ~30 fps no celular.
-- Fundo desligado com "economia de dados" ou "movimento reduzido".
-- Spotlight do cursor desligado em telas de toque.
-- Sem bibliotecas: o site inteiro tem poucas dezenas de KB de JS.
+**Desempenho (V2)**
+- A cena 3D carrega **por último**, quando o navegador fica ocioso. O texto aparece antes.
+- Celular: 9 mil partículas, DPR até 1.5, ~30 fps e sem bloom.
+- Cena desligada com "economia de dados" ou "movimento reduzido".
+- Rolagem suave (Lenis) só na roda do mouse. No toque, a rolagem é a nativa.
+- Cursor em anel, spotlight e botões magnéticos só com mouse.
+- Painel de calibração (Leva) como bottom sheet.
 
 ## Checklist antes de publicar
 
@@ -56,7 +58,7 @@ O mobile é prioridade: a maior parte dos recrutadores abre o link do portfólio
 - [ ] 390 × 844 (iPhone) e 412 × 915 (Android)
 - [ ] Celular deitado (844 × 390): menu e hero cabem
 - [ ] Menu abre, fecha, trava a rolagem e o foco não escapa
-- [ ] Projeto abre em tela cheia e "Fechar" está sempre visível
+- [ ] Página do projeto abre, o título cabe sem hífen e "Todos os projetos" volta para a lista
 - [ ] Painel abre como bottom sheet e os controles respondem ao dedo
 - [ ] Tema claro e escuro legíveis ao sol (contraste AA)
 - [ ] Botão de WhatsApp abre o app com a mensagem pronta
@@ -67,10 +69,17 @@ O mobile é prioridade: a maior parte dos recrutadores abre o link do portfólio
 1. **Chrome DevTools:** `Ctrl+Shift+M` (modo dispositivo) → testar 360, 390, 412, 768 e 1024, nas duas orientações.
 2. **No celular de verdade, na mesma rede Wi-Fi:**
    ```bash
-   python3 -m http.server 8000 --bind 0.0.0.0
-   # no celular: http://IP-DO-COMPUTADOR:8000
+   npm run dev -- --host
+   # no celular: o endereço "Network" que aparecer no terminal
    ```
    No WSL, talvez seja preciso liberar a porta no Windows ou usar o IP do Windows.
 3. **Lighthouse:** DevTools → Lighthouse → Mobile → Analisar.
 
-Na V2, esses testes viram automáticos com Playwright (ver [roadmap](05-roadmap-v2.md)).
+**Automático:** `npm test` roda o Playwright em 360, 390, 844×390 (deitado), 768, 1440 e 1920 px. Ele verifica:
+- que não há rolagem lateral;
+- que os alvos de toque têm ≥ 44 px;
+- o menu do celular;
+- o filtro;
+- a navegação para a página do projeto;
+- o painel de calibração;
+- que não há erros de JavaScript.

@@ -100,6 +100,16 @@ public/            curriculo.pdf, og.png, poster-3d.webp
 
 ---
 
+## Status (2026-11-05)
+
+Etapas 1 a 6 implementadas. O que ficou diferente do plano:
+- Projetos abrem como **página própria** com View Transition, no lugar da janela por cima da página.
+- O **painel Leva** vira bottom sheet no celular.
+- A **cena 3D** tem 9 mil, 22 mil ou 45 mil partículas, conforme o aparelho.
+- O **deploy** precisa que Pages seja ativado uma vez no GitHub.
+
+Pendente: medir o Lighthouse com o site publicado e testar em aparelhos reais.
+
 ## 6. Etapas (um commit por etapa)
 
 Cada etapa só termina quando o critério de pronto passa **também no celular** (ver [06-mobile.md](06-mobile.md)).
