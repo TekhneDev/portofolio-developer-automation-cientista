@@ -2,7 +2,8 @@
 <html lang="pt-BR" data-theme="dark">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- viewport-fit=cover: usa a tela inteira em celulares com notch; o CSS compensa com env(safe-area-inset-*) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Carla Braga — Desenvolvedora Full Stack</title>
   <meta name="description" content="Carla Braga, desenvolvedora full stack com formação em ciência e engenharia de automação. Aplicações web, APIs e automações para produção. Disponível para CLT e PJ.">
   <meta name="theme-color" content="#0E0A14">
@@ -29,12 +30,15 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- Acessibilidade: primeiro item focável, leva direto ao conteúdo -->
   <a class="skip" href="#conteudo">Pular para o conteúdo</a>
 
+  <!-- Fundo: campo de fluxo em WebGL (js/field.js) + brilho que segue o cursor -->
   <canvas id="field" aria-hidden="true"></canvas>
   <div class="spot" aria-hidden="true"></div>
 
   <div class="shell">
+    <!-- Sidebar fixa (desktop) · header fixo (tablet) · barra + menu em tela cheia (celular) -->
     <header class="side" id="topo">
       <div class="side__head">
         <a class="brand" href="#sobre">
@@ -179,6 +183,7 @@
   <!-- Painel de calibração do campo -->
   <aside class="panel" id="panel" aria-label="Calibração do fundo" hidden></aside>
 
+  <!-- Todo o conteúdo das seções é montado por js/main.js a partir de js/data.js -->
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

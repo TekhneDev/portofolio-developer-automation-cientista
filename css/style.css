@@ -1,7 +1,26 @@
 /* =========================================================================
-   Carla Braga — portfólio
+   Carla Braga — portfólio · style.css
+   -------------------------------------------------------------------------
    Paleta: roxo · lilás · rosa · verde neon · verde neon escuro
-   Tipos: Archivo (display) · IBM Plex Sans (texto) · IBM Plex Mono (dados)
+   Tipos:  Archivo (display) · IBM Plex Sans (texto) · IBM Plex Mono (dados)
+
+   ÍNDICE
+   1. Tokens (cores, tipos, espaços) — tema escuro padrão + tema claro
+   2. Base e acessibilidade (foco, skip link, toque)
+   3. Fundo (canvas WebGL + spotlight)
+   4. Shell desktop (sidebar fixa) e navegação
+   5. Componentes: seções, tags, botões
+   6. Seções 01–06 (hero, projetos, lab, trajetória, contratação, contato)
+   7. Janela de projeto (dialog) e painel de calibração
+   8. Responsivo: tablet (700–1099) → celular (<700) → celular pequeno (<420)
+      → celular deitado (altura < 500)
+   9. Movimento reduzido
+
+   CONVENÇÕES
+   - Nomes de classe em BEM curto: .bloco, .bloco__parte, .bloco--variante
+   - Todo tamanho de fonte é fluido via clamp() (escala --s-1 … --s-hero)
+   - Mobile: alvos de toque ≥ 44 px, efeitos de hover só em @media (hover: hover),
+     áreas seguras do notch via env(safe-area-inset-*)
    ========================================================================= */
 
 :root {
@@ -82,6 +101,10 @@ h1, h2, h3, h4, p, ul, ol, dl, dd, figure { margin: 0; }
 ul, ol { padding: 0; list-style: none; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+/* Toque: remove o atraso de duplo toque e o "flash" azul padrão do mobile. */
+a, button, summary, label { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+/* Palavras longas (URLs, nomes de tecnologia) nunca estouram a largura. */
+p, li, dd, h3, h4 { overflow-wrap: break-word; }
 kbd {
   font: 500 0.72em var(--f-mono);
   border: 1px solid var(--line);
@@ -162,7 +185,8 @@ kbd {
   color: var(--muted);
   transition: color 0.2s;
 }
-.nav__n { width: 2ch; }
+.nav__n { width: 2ch; flex: none; }
+.nav__list a { white-space: nowrap; }   /* número e rótulo nunca quebram em 2 linhas */
 .nav__bar {
   width: 24px; height: 1px; background: currentColor;
   transition: width 0.45s var(--spring), background-color 0.2s;
@@ -237,7 +261,8 @@ main:focus { outline: none; }
   font: 500 var(--s-1) var(--f-mono); letter-spacing: 0.02em;
   transition: border-color 0.2s, color 0.2s, background-color 0.2s, transform 0.45s var(--spring);
 }
-.btn:hover { border-color: var(--lilas); transform: translateY(-2px); }
+/* Levantar no hover só em dispositivos com mouse: no toque o estado "grudaria". */
+@media (hover: hover) { .btn:hover { border-color: var(--lilas); transform: translateY(-2px); } }
 .btn:active { transform: scale(0.96); }
 .btn--solid { background: var(--neon); border-color: var(--neon); color: #0E0A14; }
 .btn--solid:hover { background: var(--lilas); border-color: var(--lilas); color: #0E0A14; }
@@ -376,7 +401,8 @@ main:focus { outline: none; }
 .lab__go { margin-top: 6px; font: 500 0.75rem var(--f-mono); color: var(--neon); text-transform: uppercase; letter-spacing: 0.08em; }
 :root[data-theme="light"] .lab__go { color: var(--neon-escuro); }
 .lab__go--muted { color: var(--muted) !important; }
-a.lab__item:hover, button.lab__item:hover { border-color: var(--rosa); transform: translateY(-4px); }
+@media (hover: hover) { a.lab__item:hover, button.lab__item:hover { border-color: var(--rosa); transform: translateY(-4px); } }
+a.lab__item:active, button.lab__item:active { border-color: var(--rosa); }
 
 /* ---------- 04 · Trajetória ---------- */
 .filter { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
@@ -617,7 +643,10 @@ a.lab__item:hover, button.lab__item:hover { border-color: var(--rosa); transform
   .pref { padding: 6px 8px; }
 
   main { padding-top: 56px; }
-  .sec { scroll-margin-top: 88px; }
+  /* --header-h é medido em JS (setupHeaderHeight): a âncora para logo abaixo do header. */
+  .sec { scroll-margin-top: calc(var(--header-h, 88px) + 16px); }
+  /* Notch: o header respeita a área segura do topo e das laterais. */
+  .side { padding-top: max(12px, env(safe-area-inset-top)); }
 }
 
 @media (max-width: 1099px) and (min-width: 700px) {
@@ -649,13 +678,14 @@ a.lab__item:hover, button.lab__item:hover { border-color: var(--rosa); transform
   .nav {
     position: fixed; inset: 0; z-index: 40;
     flex-direction: column; align-items: stretch; justify-content: center; gap: 40px;
-    padding: 88px var(--gutter) 32px;
+    padding: calc(88px + env(safe-area-inset-top)) var(--gutter) calc(32px + env(safe-area-inset-bottom));
     background: var(--bg);
+    overflow-y: auto; overscroll-behavior: contain;   /* rola se a tela for baixa */
     visibility: hidden; opacity: 0;
     transition: opacity 0.3s var(--ease), visibility 0s 0.3s;
   }
   .menu-open .nav { visibility: visible; opacity: 1; transition: opacity 0.3s var(--ease); }
-  .menu-open body { overflow: hidden; }
+  .menu-open body { overflow: hidden; }   /* trava a página atrás do menu */
   .brand { position: relative; z-index: 41; }
 
   .nav__list { flex-direction: column; gap: 0; }
@@ -701,19 +731,68 @@ a.lab__item:hover, button.lab__item:hover { border-color: var(--rosa); transform
   .steps { grid-template-columns: 1fr 1fr; }
   .facts, .results { grid-template-columns: 1fr; }
 
+  /* Detalhe do projeto em tela cheia; o cabeçalho com "Fechar" fica fixo
+     no topo para estar sempre ao alcance do polegar. */
   .sheet {
     width: 100%; max-width: none; height: 100dvh; max-height: none;
     border: 0; border-radius: 0;
   }
+  .sheet__inner { padding-top: 0; padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
+  .sheet__head {
+    position: sticky; top: 0; z-index: 2;
+    margin: 0 calc(clamp(20px, 4vw, 48px) * -1);
+    padding: max(8px, env(safe-area-inset-top)) clamp(20px, 4vw, 48px) 8px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
   .sheet__back { justify-self: stretch; }
 
-  .panel { right: 8px; left: 8px; bottom: 8px; width: auto; }
+  /* Painel de calibração vira "bottom sheet": largura total, rolagem interna,
+     linhas mais altas e controles maiores para o dedo. */
+  .panel {
+    left: 0; right: 0; bottom: 0; width: auto;
+    max-height: 72dvh; overflow-y: auto; overscroll-behavior: contain;
+    border-radius: 12px 12px 0 0; border-bottom: 0;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+  .panel__row { grid-template-columns: 1fr 3.5em; row-gap: 2px; min-height: 52px; }
+  .panel__row .panel__label { grid-column: 1 / -1; }
+  .panel input[type="range"] { height: 32px; }
+  .chip span { padding: 10px 14px; }
+  .panel__foot .btn { flex: 1; min-height: 44px; }
+
+  .foot { padding-bottom: env(safe-area-inset-bottom); }
 }
 
 @media (max-width: 420px) {
+  .avail { grid-template-columns: 1fr; }
   .steps { grid-template-columns: 1fr; }
   .contact__actions .btn { flex: 1 1 100%; }
 }
+
+/* =========================================================================
+   Celular deitado (pouca altura): menu em 2 colunas e hero menor,
+   para o conteúdo principal caber sem rolar o menu.
+   ========================================================================= */
+@media (max-height: 500px) and (orientation: landscape) and (max-width: 1099px) {
+  .hero__name { font-size: clamp(2.8rem, 12vh, 5rem); }
+  .sheet__head { position: static; }
+}
+/* Celular deitado estreito (< 700 px): menu em tela cheia com 2 colunas. */
+@media (max-height: 500px) and (orientation: landscape) and (max-width: 699px) {
+  .nav { justify-content: flex-start; }
+  .nav__list { display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; }
+  .nav__list a { min-height: 44px; font-size: clamp(1.2rem, 4vw, 1.6rem); }
+}
+/* Celular deitado largo (700–1099 px cai no layout de tablet): o header deixa
+   de ser fixo para não ocupar um terço da altura da tela. */
+@media (max-height: 500px) and (orientation: landscape) and (min-width: 700px) and (max-width: 1099px) {
+  .side { position: relative; }
+  .sec { scroll-margin-top: 16px; }
+}
+
+/* Trava a rolagem da página enquanto o detalhe do projeto está aberto. */
+.sheet-open body { overflow: hidden; }
 
 /* ---------- Movimento reduzido ---------- */
 @media (prefers-reduced-motion: reduce) {
