@@ -1,8 +1,6 @@
 /* Painel de calibração do campo de fluxo. */
 import { DEFAULTS } from './field.js';
 
-const KEY = 'cb-field';
-
 const CONTROLS = [
   { key: 'freq', label: 'Frequência', min: 0.4, max: 4, step: 0.05 },
   { key: 'warp', label: 'Ruído', min: 0, max: 4, step: 0.05 },
@@ -17,14 +15,6 @@ const PALETTES = [
   { id: 'rosa', label: 'Rosa' },
   { id: 'neon', label: 'Neon' },
 ];
-
-export function loadFieldParams() {
-  try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; }
-}
-
-function save(params) {
-  try { localStorage.setItem(KEY, JSON.stringify(params)); } catch { /* sem storage */ }
-}
 
 const fmt = (v, step) => (step < 1 ? Number(v).toFixed(2) : String(v));
 
@@ -73,7 +63,6 @@ export function createPanel(el, field, { onToggle } = {}) {
       field.set(name, Number(value));
       el.querySelector(`[data-out="${name}"]`).textContent = fmt(value, c.step);
     }
-    save(params);
   });
 
   el.querySelector('[data-close]').addEventListener('click', () => close());
@@ -88,7 +77,6 @@ export function createPanel(el, field, { onToggle } = {}) {
   el.querySelector('[data-reset]').addEventListener('click', () => {
     if (!field) return;
     Object.entries(DEFAULTS).forEach(([k, v]) => field.set(k, v));
-    save(params);
     sync();
   });
 

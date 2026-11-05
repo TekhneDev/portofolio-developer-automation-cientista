@@ -3,7 +3,7 @@ import {
   publications, awards, hiring, steps, faq,
 } from './data.js';
 import { createField } from './field.js';
-import { createPanel, loadFieldParams } from './panel.js';
+import { createPanel } from './panel.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -313,7 +313,7 @@ render();
 
 let field = null;
 if (!reduceMotion.matches) {
-  field = createField($('#field'), loadFieldParams());
+  field = createField($('#field'));
   field?.start();
 }
 if (!field) root.classList.add('no-field');

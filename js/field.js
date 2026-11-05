@@ -72,14 +72,15 @@ void main() {
   outColor = vec4(col * a, a);
 }`;
 
+// Valores com que o site sempre abre.
 export const DEFAULTS = {
-  freq: 1.6,
-  warp: 1.8,
-  density: 14,
-  speed: 0.35,
-  glow: 0.9,
+  freq: 3.35,
+  warp: 1.3,
+  density: 16,
+  speed: 0.4,
+  glow: 1.55,
   alpha: 0.22,
-  palette: 'lilas',
+  palette: 'rosa',
 };
 
 function hexToRgb(hex) {

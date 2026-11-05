@@ -560,9 +560,8 @@ a.lab__item:hover, button.lab__item:hover { border-color: var(--rosa); transform
 .panel__val { text-align: right; color: var(--ink); }
 .panel input[type="range"] { width: 100%; accent-color: var(--lilas); }
 :root[data-theme="light"] .panel input[type="range"] { accent-color: var(--roxo); }
-.panel__pal { grid-template-columns: 9.5em 1fr; }
-.panel__pal legend { float: left; width: 9.5em; padding: 0; line-height: 36px; }
-.panel__pal { display: flex; flex-wrap: wrap; gap: 6px; }
+.panel__pal { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding-top: 6px; }
+.panel__pal legend { float: left; width: 100%; padding: 0 0 6px; }
 .chip { position: relative; }
 .chip input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
 .chip span { display: inline-block; padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); }
