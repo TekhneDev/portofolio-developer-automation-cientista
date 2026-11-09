@@ -82,6 +82,8 @@ const ogImage = new URL(url('og.png'), Astro.site);
   <body>
     <a class="skip" href="#conteudo">Pular para o conteúdo</a>
 
+    <!-- Tom do fundo: escurece para um roxo profundo conforme a rolagem -->
+    <div class="depth" aria-hidden="true"></div>
     <!-- Cena 3D atrás de todo o conteúdo -->
     <div class="scene" aria-hidden="true" transition:persist="scene">
       <Atom />

@@ -127,6 +127,44 @@ kbd {
 }
 .skip:focus { top: 16px; }
 
+/* ---------- Fundo: profundidade na rolagem ----------
+   Camada fixa entre o fundo da página e a cena 3D (as partículas continuam
+   por cima, intactas). No topo é invisível — o site fica como sempre foi;
+   ao rolar, ganha um roxo cada vez mais escuro. Usa animação ligada ao
+   scroll (roda fora da thread principal); onde não há suporte, ui.ts
+   escreve --depth (0 → 1) e o fallback abaixo assume. Só no tema escuro. */
+.depth {
+  position: fixed; inset: 0; z-index: -3; pointer-events: none;
+  background-color: #1A0A30;
+  opacity: 0;
+}
+/* Brilho violeta suave embaixo + vinheta nas bordas: dá profundidade, não "chapado". */
+.depth::before {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(120vmax 70vmax at 50% 115%, color-mix(in oklab, var(--roxo) 22%, transparent), transparent 60%),
+    radial-gradient(140vmax 100vmax at 50% 40%, transparent 45%, rgb(5 1 10 / 0.55) 100%);
+}
+@supports (animation-timeline: scroll()) {
+  .depth {
+    animation: depth linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+@keyframes depth {
+  0%   { opacity: 0;    background-color: #1A0A30; }
+  12%  { opacity: 0.15; }
+  55%  { opacity: 0.8;  background-color: #170829; }
+  100% { opacity: 1;    background-color: #0C0318; }
+}
+@supports not (animation-timeline: scroll()) {
+  .depth {
+    opacity: var(--depth, 0);
+    background-color: color-mix(in oklab, #1A0A30, #0C0318 calc(var(--depth, 0) * 100%));
+  }
+}
+:root[data-theme="light"] .depth { display: none; }
+
 /* ---------- Fundo: cena 3D (React Three Fiber) ---------- */
 /* Camada fixa atrás de tudo. Sem WebGL / movimento reduzido, fica só
    um brilho suave em CSS (o "plano B" visual). */

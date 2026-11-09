@@ -61,6 +61,25 @@ window.addEventListener(EVT.panelState, (e) => {
 });
 
 /* =========================================================================
+   Profundidade do fundo na rolagem — fallback
+   Onde o CSS já suporta animation-timeline: scroll(), nada aqui roda.
+   Senão, escreve --depth (0 → 1) no <html>, no máximo uma vez por quadro.
+   ========================================================================= */
+if (!CSS.supports('animation-timeline: scroll()')) {
+  let queued = false;
+  const update = () => {
+    queued = false;
+    const max = document.documentElement.scrollHeight - innerHeight;
+    const p = max > 0 ? Math.min(scrollY / max, 1) : 0;
+    root.style.setProperty('--depth', (p * (2 - p)).toFixed(3)); // ease-out: escurece cedo, assenta no fim
+  };
+  const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+  addEventListener('scroll', queue, { passive: true });
+  addEventListener('resize', queue, { passive: true });
+  document.addEventListener('astro:page-load', queue);
+}
+
+/* =========================================================================
    Inicialização por página
    ========================================================================= */
 let page: AbortController | null = null;
