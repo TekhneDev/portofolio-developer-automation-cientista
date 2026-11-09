@@ -491,6 +491,124 @@ main:focus { outline: none; }
 .gh__meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: auto; font: 500 0.75rem var(--f-mono); color: var(--muted); }
 .gh__fallback { margin-top: 24px; color: var(--muted); }
 .gh__fallback a { color: var(--lilas); }
+
+/* ---------- Modal de repositório (<dialog>) ----------
+   Centralizado, com rolagem interna; cabeçalho e rodapé fixos no modal.
+   Entrada/saída: fade + leve subida (@starting-style), sem JS. */
+.repo {
+  width: min(1040px, calc(100vw - 32px));
+  max-height: min(88dvh, 920px);
+  margin: auto; padding: 0;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: color-mix(in oklab, var(--surface) 94%, transparent);
+  color: var(--ink);
+  box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.7), 0 0 0 1px color-mix(in oklab, var(--roxo) 18%, transparent);
+  overflow: hidden;
+  opacity: 0; transform: translateY(16px) scale(0.985);
+  transition: opacity 0.3s var(--ease), transform 0.45s var(--spring), overlay 0.3s allow-discrete, display 0.3s allow-discrete;
+}
+.repo[open] { opacity: 1; transform: none; }
+@starting-style { .repo[open] { opacity: 0; transform: translateY(16px) scale(0.985); } }
+.repo::backdrop {
+  background: rgb(6 2 12 / 0); backdrop-filter: blur(0);
+  transition: background-color 0.3s var(--ease), backdrop-filter 0.3s var(--ease), overlay 0.3s allow-discrete, display 0.3s allow-discrete;
+}
+.repo[open]::backdrop { background: rgb(6 2 12 / 0.72); backdrop-filter: blur(6px); }
+@starting-style { .repo[open]::backdrop { background: rgb(6 2 12 / 0); backdrop-filter: blur(0); } }
+:root[data-theme="light"] .repo[open]::backdrop { background: rgb(30 15 50 / 0.45); }
+.modal-open { overflow: hidden; }
+
+.repo__inner { display: flex; flex-direction: column; max-height: inherit; }
+.repo__head {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+  padding: 20px 24px 16px; border-bottom: 1px solid var(--line);
+}
+.repo__head .eyebrow { margin-bottom: 4px; }
+.repo__title { font: 800 var(--s1)/1.15 var(--f-display); font-stretch: 108%; overflow-wrap: anywhere; }
+.repo__close {
+  flex: none; display: grid; place-items: center; width: 44px; height: 44px;
+  border: 1px solid var(--line); border-radius: 50%; color: var(--muted);
+  transition: color 0.2s, border-color 0.2s, transform 0.4s var(--spring);
+}
+.repo__close:hover { color: var(--ink); border-color: var(--rosa); transform: rotate(90deg); }
+
+.repo__body {
+  overflow-y: auto; overscroll-behavior: contain;
+  display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 24px 28px; padding: 24px;
+}
+.repo__media { margin: 0; display: grid; gap: 10px; align-content: start; }
+.repo__frame {
+  aspect-ratio: 2 / 1; border: 1px solid var(--line); border-radius: 6px; overflow: hidden;
+  background:
+    repeating-linear-gradient(135deg, transparent 0 10px, color-mix(in oklab, var(--line) 50%, transparent) 10px 11px),
+    var(--bg);
+}
+.repo__frame { position: relative; }
+.repo__frame img { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; }
+.repo__frame img.is-broken { visibility: hidden; }
+/* Quadro de reserva (por baixo da imagem): aparece enquanto carrega ou se falhar. */
+.repo__ph {
+  position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; text-align: center;
+  font: 800 clamp(1.2rem, 3vw, 2rem)/1.1 var(--f-display); font-stretch: 112%;
+  color: transparent; -webkit-text-stroke: 1px color-mix(in oklab, var(--lilas) 60%, transparent);
+  overflow-wrap: anywhere;
+}
+.repo__media figcaption { font: 500 0.78rem var(--f-mono); color: var(--muted); }
+.repo__thumbs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
+.repo__thumbs button {
+  display: block; width: 96px; aspect-ratio: 16 / 9; padding: 0; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 4px; opacity: 0.6;
+  transition: opacity 0.2s, border-color 0.2s;
+}
+.repo__thumbs button img { width: 100%; height: 100%; object-fit: cover; }
+.repo__thumbs button:hover, .repo__thumbs [aria-pressed="true"] { opacity: 1; border-color: var(--lilas); }
+
+.repo__info { display: grid; gap: 18px; align-content: start; }
+.repo__desc { font-size: var(--s0); line-height: 1.55; }
+.repo__langs { display: grid; gap: 10px; }
+.repo__bar { display: flex; height: 6px; border-radius: 99px; overflow: hidden; gap: 2px; }
+.repo__bar span, .repo__langs i {
+  background: color-mix(in oklab, var(--lilas), var(--roxo) calc(var(--i) * 22%));
+}
+.repo__bar span:nth-child(n+6), .repo__langs li:nth-child(n+6) i { background: var(--muted); }
+.repo__langs ul { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 500 0.78rem var(--f-mono); }
+.repo__langs li { display: inline-flex; align-items: center; gap: 6px; }
+.repo__langs i { width: 8px; height: 8px; border-radius: 50%; }
+.repo__langs li span { color: var(--muted); }
+.repo__facts {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px; border: 1px solid var(--line); background: var(--line);
+}
+.repo__facts div { background: var(--surface); padding: 10px 12px; }
+.repo__facts div:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.repo__facts dt { font: 500 0.68rem var(--f-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+.repo__facts dd { margin-top: 2px; font-size: var(--s-1); font-variant-numeric: tabular-nums; }
+
+.repo__about { grid-column: 1 / -1; }
+.repo__about .sec__label { margin: 0 0 12px; }
+.repo__text { display: grid; gap: 10px; max-width: 75ch; color: var(--muted); font-size: var(--s-1); line-height: 1.65; }
+.repo__text h4 { margin-top: 8px; font: 700 var(--s0)/1.3 var(--f-display); color: var(--ink); }
+.repo__li { position: relative; padding-left: 18px; }
+.repo__li::before { content: ""; position: absolute; left: 4px; top: 0.75em; width: 5px; height: 5px; border-radius: 50%; background: var(--lilas); }
+.repo__src { margin-top: 14px; font: 500 0.72rem var(--f-mono); color: var(--muted); opacity: 0.7; }
+
+.repo__foot {
+  display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px;
+  padding: 16px 24px; border-top: 1px solid var(--line);
+  background: color-mix(in oklab, var(--surface) 80%, var(--bg));
+}
+
+@media (max-width: 760px) {
+  .repo { width: 100vw; max-width: 100vw; max-height: 92dvh; margin: auto 0 0; border-radius: 14px 14px 0 0; }
+  .repo__body { grid-template-columns: 1fr; padding: 18px 16px; }
+  .repo__head { padding: 16px; }
+  .repo__foot { padding: 14px 16px max(14px, env(safe-area-inset-bottom)); }
+  .repo__foot .btn { flex: 1 1 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .repo, .repo::backdrop { transition: none; }
+}
 a.lab__item:active, button.lab__item:active { border-color: var(--rosa); }
 
 /* ---------- 04 · Trajetória ---------- */

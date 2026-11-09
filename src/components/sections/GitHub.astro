@@ -6,7 +6,9 @@
    vivo (uma chamada à API pública). Se a chamada falhar, fica o do build.
    ========================================================================= */
 import { getGithub, GITHUB_USER } from '../../lib/github';
+import { githubExtras } from '../../data/github-extras';
 import SectionHead from '../ui/SectionHead.astro';
+import RepoModal from '../ui/RepoModal.astro';
 
 const gh = await getGithub();
 const profileUrl = gh?.url ?? `https://github.com/${GITHUB_USER}`;
@@ -38,7 +40,9 @@ const fmtDate = (iso: string) =>
       <ul class="lab gh__repos" data-reveal-group>
         {gh.repos.map((r) => (
           <li>
-            <a class="lab__item" href={r.url} target="_blank" rel="noopener">
+            {/* Link real para o GitHub; com JS, o clique abre o modal de detalhes
+                (Ctrl/⌘+clique e clique do meio continuam abrindo o GitHub). */}
+            <a class="lab__item" href={r.url} target="_blank" rel="noopener" data-repo={`gh-${r.name}`} aria-haspopup="dialog">
               <h3>{r.name}</h3>
               <p>{r.description ?? 'Sem descrição.'}</p>
               <span class="gh__meta">
@@ -46,10 +50,12 @@ const fmtDate = (iso: string) =>
                 <span aria-label={`${r.stars} estrelas`}>★ {r.stars}</span>
                 <span>atualizado {fmtDate(r.pushedAt)}</span>
               </span>
+              <span class="lab__go">Ver detalhes</span>
             </a>
           </li>
         ))}
       </ul>
+      {gh.repos.map((r) => <RepoModal repo={r} extra={githubExtras[r.name]} />)}
     </div>
   ) : (
     <p class="gh__fallback">
@@ -76,4 +82,58 @@ const fmtDate = (iso: string) =>
     } catch { /* mantém os números do build */ }
   }
   document.addEventListener('astro:page-load', refresh);
+
+  /* ---------- Modal de detalhes ---------- */
+  import { emit, EVT } from '../../lib/bus';
+
+  let ctrl: AbortController | null = null;
+  document.addEventListener('astro:page-load', () => {
+    ctrl?.abort();
+    ctrl = new AbortController();
+    const { signal } = ctrl;
+
+    document.querySelectorAll<HTMLAnchorElement>('[data-repo]').forEach((card) => {
+      const dlg = document.getElementById(card.dataset.repo!) as HTMLDialogElement | null;
+      if (!dlg) return;
+      card.addEventListener('click', (e) => {
+        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // nova aba: deixa o link
+        e.preventDefault();
+        dlg.showModal();
+        emit(EVT.lock, true);                    // pausa a rolagem suave da página
+        document.documentElement.classList.add('modal-open');
+      }, { signal });
+    });
+
+    document.querySelectorAll<HTMLDialogElement>('dialog.repo').forEach((dlg) => {
+      const main = dlg.querySelector<HTMLImageElement>('[data-main]');
+      // Prévia indisponível: esconde a imagem quebrada e mostra o quadro com o nome.
+      if (main) {
+        const fail = () => main.classList.add('is-broken');
+        main.addEventListener('error', fail, { signal });
+        main.addEventListener('load', () => main.classList.remove('is-broken'), { signal });
+        if (main.complete && main.naturalWidth === 0 && main.currentSrc) fail();
+      }
+      const cap = dlg.querySelector<HTMLElement>('[data-caption]');
+      // Fecha no X ou clicando no fundo escurecido (fora do conteúdo).
+      dlg.addEventListener('click', (e) => {
+        const t = e.target as HTMLElement;
+        if (t === dlg || t.closest('[data-close]')) dlg.close();
+        const thumb = t.closest<HTMLButtonElement>('[data-thumb]');
+        if (thumb && main) {
+          main.src = thumb.dataset.thumb!;
+          main.alt = thumb.dataset.alt!;
+          if (cap) cap.textContent = thumb.dataset.legenda ?? '';
+          dlg.querySelectorAll('[data-thumb]').forEach((b) => b.setAttribute('aria-pressed', String(b === thumb)));
+        }
+      }, { signal });
+      dlg.addEventListener('close', () => {
+        emit(EVT.lock, false);
+        document.documentElement.classList.remove('modal-open');
+      }, { signal });
+    });
+  });
+  // Troca de página com um modal aberto: libera a rolagem.
+  document.addEventListener('astro:before-swap', () => {
+    document.querySelectorAll<HTMLDialogElement>('dialog.repo[open]').forEach((d) => d.close());
+  });
 </script>

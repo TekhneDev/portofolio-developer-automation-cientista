@@ -1,0 +1,101 @@
+---
+/* =========================================================================
+   RepoModal.astro — Detalhes de um repositório em <dialog> nativo
+   -------------------------------------------------------------------------
+   Aberto pelos cards da seção GitHub (ver script em GitHub.astro).
+   <dialog> + showModal() já dá: foco preso dentro, Esc fecha, fundo inerte.
+   Conteúdo: mídia (prints próprios ou a prévia do GitHub), descrição,
+   resumo (texto próprio ou trecho do README), linguagens, dados e links.
+   ========================================================================= */
+import type { GhRepo } from '../../lib/github';
+import type { RepoExtra } from '../../data/github-extras';
+import { url } from '../../lib/utils';
+import Tags from './Tags.astro';
+
+interface Props { repo: GhRepo; extra?: RepoExtra }
+const { repo: r, extra } = Astro.props;
+
+const id = `gh-${r.name}`;
+const fmt = (iso: string) => new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+const images = (extra?.imagens ?? []).map((i) => ({ ...i, src: url(i.src) }));
+const media = images.length
+  ? images
+  : [{ src: r.preview, alt: `Prévia do repositório ${r.name} no GitHub`, legenda: undefined }];
+const resumo = extra?.resumo;
+---
+<dialog class="repo" id={id} aria-labelledby={`${id}-t`} data-lenis-prevent>
+  <div class="repo__inner">
+    <header class="repo__head">
+      <div>
+        <p class="eyebrow">Repositório</p>
+        <h3 class="repo__title" id={`${id}-t`}>{r.name}</h3>
+      </div>
+      <button type="button" class="repo__close" data-close aria-label="Fechar">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+      </button>
+    </header>
+
+    <div class="repo__body">
+      <figure class="repo__media">
+        <div class="repo__frame">
+          <img src={media[0].src} alt={media[0].alt} width="1200" height="600" loading="lazy" decoding="async" data-main />
+          <span class="repo__ph" aria-hidden="true">{r.name}</span>
+        </div>
+        {media[0].legenda && <figcaption data-caption>{media[0].legenda}</figcaption>}
+        {media.length > 1 && (
+          <ul class="repo__thumbs" aria-label="Imagens do projeto">
+            {media.map((m, i) => (
+              <li>
+                <button type="button" data-thumb={m.src} data-alt={m.alt} data-legenda={m.legenda ?? ''} aria-pressed={i === 0 ? 'true' : 'false'} aria-label={`Ver imagem ${i + 1}: ${m.alt}`}>
+                  <img src={m.src} alt="" width="120" height="68" loading="lazy" decoding="async" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </figure>
+
+      <div class="repo__info">
+        <p class="repo__desc">{r.description ?? 'Sem descrição no GitHub.'}</p>
+
+        {r.languages.length > 0 && (
+          <div class="repo__langs">
+            <div class="repo__bar" aria-hidden="true">
+              {r.languages.map((l, i) => <span style={`flex:${l.pct};--i:${i}`}></span>)}
+            </div>
+            <ul>
+              {r.languages.slice(0, 5).map((l, i) => <li style={`--i:${i}`}><i></i>{l.name} <span>{l.pct.toLocaleString('pt-BR')}%</span></li>)}
+            </ul>
+          </div>
+        )}
+
+        <dl class="repo__facts">
+          <div><dt>Estrelas</dt><dd>{r.stars}</dd></div>
+          <div><dt>Forks</dt><dd>{r.forks}</dd></div>
+          <div><dt>Criado</dt><dd>{fmt(r.createdAt)}</dd></div>
+          <div><dt>Atualizado</dt><dd>{fmt(r.pushedAt)}</dd></div>
+          {r.license && <div><dt>Licença</dt><dd>{r.license}</dd></div>}
+        </dl>
+
+        {r.topics.length > 0 && <Tags items={r.topics} />}
+      </div>
+
+      {(resumo?.length || r.readme.length > 0) && (
+        <section class="repo__about" aria-label="Sobre o projeto">
+          <p class="sec__label">Sobre o projeto</p>
+          <div class="repo__text">
+            {resumo
+              ? resumo.map((p) => <p>{p}</p>)
+              : r.readme.filter((b) => !(b.type === 'h' && /^sobre( o projeto)?$/i.test(b.text))).map((b) => b.type === 'h' ? <h4>{b.text}</h4> : b.type === 'li' ? <p class="repo__li">{b.text}</p> : <p>{b.text}</p>)}
+          </div>
+          {!resumo && <p class="repo__src">Trecho do README do repositório.</p>}
+        </section>
+      )}
+    </div>
+
+    <footer class="repo__foot">
+      {r.homepage && <a class="btn" href={r.homepage} target="_blank" rel="noopener">Ver site / demo ↗</a>}
+      <a class="btn btn--solid" href={r.url} target="_blank" rel="noopener">Abrir no GitHub ↗</a>
+    </footer>
+  </div>
+</dialog>
