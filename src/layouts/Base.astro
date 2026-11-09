@@ -69,7 +69,7 @@ const ogImage = new URL(url('og.png'), Astro.site);
         function apply() {
           var d = document.documentElement, theme = null;
           try { theme = localStorage.getItem('cb-theme'); localStorage.removeItem('cb-font'); } catch (e) {}
-          if (!theme) theme = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          if (theme !== 'light') theme = 'dark'; // padrão: escuro (ignora o tema do sistema)
           d.dataset.theme = theme;
         }
         apply();
