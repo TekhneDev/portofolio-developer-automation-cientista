@@ -8,7 +8,7 @@
 
    Itens:
    1. Navegação: seção ativa no menu + menu em tela cheia no celular
-   2. Preferências: tema, fonte mono, som e "Calibrar" (cena 3D)
+   2. Preferências: tema, som e "Calibrar" (cena 3D)
    3. Filtro da trajetória
    4. Copiar e-mail
    5. Altura do header (âncoras não ficam escondidas atrás dele)
@@ -127,7 +127,6 @@ function setupPrefs(signal: AbortSignal) {
     btn('theme').setAttribute('aria-pressed', String(light));
     $<HTMLMetaElement>('meta[name="theme-color"]')!.content = light ? '#F5F0FB' : '#0E0A14';
   };
-  const syncFont = () => btn('font').setAttribute('aria-pressed', String(root.dataset.font === 'mono'));
   const syncSound = () => btn('sound').setAttribute('aria-pressed', String(soundOn));
 
   btn('theme').addEventListener('click', () => {
@@ -136,13 +135,6 @@ function setupPrefs(signal: AbortSignal) {
     syncTheme();
     emit(EVT.theme);
     blip(700);
-  }, { signal });
-
-  btn('font').addEventListener('click', () => {
-    if (root.dataset.font === 'mono') delete root.dataset.font; else root.dataset.font = 'mono';
-    store.set('cb-font', root.dataset.font ?? 'sans');
-    syncFont();
-    blip(620);
   }, { signal });
 
   btn('sound').addEventListener('click', () => {
@@ -161,7 +153,7 @@ function setupPrefs(signal: AbortSignal) {
   // Card do Lab "Nuvem de dados em 3D" também abre o painel.
   $$('[data-action="panel"]').forEach((b) => b.addEventListener('click', () => emit(EVT.panel, { open: true }), { signal }));
 
-  syncTheme(); syncFont(); syncSound();
+  syncTheme(); syncSound();
 }
 
 /* ---------- 3. Filtro da trajetória (multi-seleção; mínimo 1 ligado) ---------- */

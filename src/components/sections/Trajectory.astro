@@ -16,7 +16,7 @@ const education = (await getCollection('formacao')).sort((a, b) => a.data.order 
 const typeLabel = (id: string) => timelineTypes.find((t) => t.id === id)?.label ?? id;
 ---
 <section class="sec" id="trajetoria" aria-labelledby="h-traj" data-morph="2">
-  <SectionHead n="04" id="h-traj" title="Trajetória" />
+  <SectionHead n="05" id="h-traj" title="Trajetória" />
 
   <div class="filter" role="group" aria-label="Filtrar experiência por área">
     {timelineTypes.map((t) => (

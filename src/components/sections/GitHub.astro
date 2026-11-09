@@ -1,0 +1,79 @@
+---
+/* =========================================================================
+   GitHub.astro — 04 · GitHub
+   Perfil e repositórios vindos direto da API do GitHub (src/lib/github.ts).
+   O HTML sai pronto do build; no navegador, os números são atualizados ao
+   vivo (uma chamada à API pública). Se a chamada falhar, fica o do build.
+   ========================================================================= */
+import { getGithub, GITHUB_USER } from '../../lib/github';
+import SectionHead from '../ui/SectionHead.astro';
+
+const gh = await getGithub();
+const profileUrl = gh?.url ?? `https://github.com/${GITHUB_USER}`;
+const fmtDate = (iso: string) =>
+  new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+---
+<section class="sec" id="github" aria-labelledby="h-github" data-morph="1">
+  <SectionHead n="04" id="h-github" title="GitHub" hint="Integrado à API do GitHub: perfil e repositórios atualizados direto da fonte." />
+
+  {gh ? (
+    <div class="gh" data-gh-user={gh.login}>
+      <a class="gh__profile" href={profileUrl} target="_blank" rel="noopener">
+        <img class="gh__avatar" src={gh.avatar} alt="" width="64" height="64" loading="lazy" decoding="async" />
+        <span class="gh__id">
+          <strong>{gh.name ?? gh.login}</strong>
+          <span>@{gh.login}</span>
+        </span>
+        <span class="lab__go">Ver perfil</span>
+      </a>
+
+      <dl class="avail gh__stats">
+        <div><dt>Repositórios</dt><dd data-gh="public_repos">{gh.publicRepos}</dd></div>
+        <div><dt>Seguidores</dt><dd data-gh="followers">{gh.followers}</dd></div>
+        <div><dt>Estrelas</dt><dd>{gh.stars}</dd></div>
+        <div><dt>Linguagens</dt><dd>{gh.languages.map((l) => l.name).join(' · ') || '—'}</dd></div>
+      </dl>
+
+      <p class="sec__label">Atividade recente</p>
+      <ul class="lab gh__repos" data-reveal-group>
+        {gh.repos.map((r) => (
+          <li>
+            <a class="lab__item" href={r.url} target="_blank" rel="noopener">
+              <h3>{r.name}</h3>
+              <p>{r.description ?? 'Sem descrição.'}</p>
+              <span class="gh__meta">
+                {r.language && <span>{r.language}</span>}
+                <span aria-label={`${r.stars} estrelas`}>★ {r.stars}</span>
+                <span>atualizado {fmtDate(r.pushedAt)}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ) : (
+    <p class="gh__fallback">
+      Veja meus repositórios em <a href={profileUrl} target="_blank" rel="noopener">github.com/{GITHUB_USER}</a>.
+    </p>
+  )}
+</section>
+
+<script>
+  /* Atualiza seguidores/repositórios ao vivo. Silencioso em caso de erro ou limite de taxa. */
+  async function refresh() {
+    const root = document.querySelector<HTMLElement>('[data-gh-user]');
+    if (!root) return;
+    try {
+      const res = await fetch(`https://api.github.com/users/${root.dataset.ghUser}`, {
+        headers: { Accept: 'application/vnd.github+json' },
+      });
+      if (!res.ok) return;
+      const u = await res.json();
+      root.querySelectorAll<HTMLElement>('[data-gh]').forEach((el) => {
+        const v = u[el.dataset.gh!];
+        if (typeof v === 'number') el.textContent = String(v);
+      });
+    } catch { /* mantém os números do build */ }
+  }
+  document.addEventListener('astro:page-load', refresh);
+</script>

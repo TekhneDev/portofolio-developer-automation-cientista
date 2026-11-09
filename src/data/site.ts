@@ -40,6 +40,7 @@ export const nav = [
   { id: 'sobre', label: 'Sobre' },
   { id: 'projetos', label: 'Projetos' },
   { id: 'lab', label: 'Lab' },
+  { id: 'github', label: 'GitHub' },
   { id: 'trajetoria', label: 'Trajetória' },
   { id: 'contratacao', label: 'Contratação' },
   { id: 'contato', label: 'Contato' },

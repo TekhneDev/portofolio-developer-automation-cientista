@@ -8,6 +8,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *'   # rebuild diário: atualiza dados da seção GitHub
 
 permissions:
   contents: read
@@ -29,6 +31,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # evita limite de taxa da API do GitHub
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

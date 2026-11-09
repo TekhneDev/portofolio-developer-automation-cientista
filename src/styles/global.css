@@ -82,7 +82,6 @@
   color-scheme: light;
 }
 
-:root[data-font="mono"] { --f-text: var(--f-mono); }
 
 /* ---------- Base ---------- */
 *, *::before, *::after { box-sizing: border-box; }
@@ -194,9 +193,13 @@ kbd {
 .side {
   position: sticky; top: 0;
   height: 100vh; height: 100dvh;
-  display: flex; flex-direction: column; gap: 56px;
-  padding: 64px 0 40px;
+  display: flex; flex-direction: column;
+  justify-content: safe center;          /* bloco centralizado na altura da tela */
+  gap: clamp(20px, 5vh, 56px);           /* espaçamentos encolhem em telas baixas */
+  padding: clamp(24px, 5vh, 64px) 0;
+  overflow-y: auto; scrollbar-width: none;  /* rede de segurança: nunca corta conteúdo */
 }
+.side::-webkit-scrollbar { display: none; }
 .side__head { display: flex; flex-direction: column; gap: 16px; }
 
 .brand { display: inline-flex; flex-direction: column; gap: 2px; }
@@ -210,12 +213,11 @@ kbd {
 
 .menu-btn { display: none; }
 
-.nav { display: flex; flex-direction: column; gap: 40px; flex: 1; }
-.nav .socials { margin-top: auto; }
+.nav { display: flex; flex-direction: column; gap: clamp(16px, 4vh, 40px); }
 .nav__list { display: grid; gap: 4px; }
 .nav__list a {
   display: inline-flex; align-items: center; gap: 14px;
-  padding: 8px 0; min-height: 44px;
+  padding: clamp(2px, 0.8vh, 8px) 0; min-height: clamp(32px, 5vh, 44px);
   font: 500 var(--s-1) var(--f-mono);
   text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--muted);
@@ -306,17 +308,18 @@ main:focus { outline: none; }
 .btn[disabled] { opacity: 0.4; pointer-events: none; }
 
 /* ---------- 01 · Hero ---------- */
-.hero { padding-top: 8px; }
+.hero { padding-top: 8px; container-type: inline-size; }
 .hero .eyebrow { margin-bottom: 12px; }
 .hero__name {
   display: flex; flex-direction: column;
-  font: 900 var(--s-hero)/0.84 var(--f-display);
+  /* "BRAGA" + recuo ocupa ~5.6em: 17cqi garante que caiba na largura da coluna */
+  font: 900 min(var(--s-hero), 17cqi)/0.84 var(--f-display);
   font-stretch: 125%;
   letter-spacing: -0.035em;
   text-transform: uppercase;
   margin-left: -0.04em;
 }
-.hero__name span { display: block; }
+.hero__name span { display: block; white-space: nowrap; }
 .hero__name span:last-child {
   color: transparent;
   -webkit-text-stroke: 1.5px var(--lilas);
@@ -428,6 +431,28 @@ main:focus { outline: none; }
 :root[data-theme="light"] .lab__go { color: var(--neon-escuro); }
 .lab__go--muted { color: var(--muted) !important; }
 @media (hover: hover) { a.lab__item:hover, button.lab__item:hover { border-color: var(--rosa); transform: translateY(-4px); } }
+
+/* ---------- 04 · GitHub (dados da API) ---------- */
+.gh__profile {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  margin-top: 24px; padding: 16px 20px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: color-mix(in oklab, var(--surface) 70%, transparent);
+  transition: border-color 0.2s;
+}
+.gh__profile:hover { border-color: var(--rosa); }
+.gh__avatar { width: 64px; height: 64px; border-radius: 50%; border: 1px solid var(--line); }
+.gh__id { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.gh__id strong { font: 700 var(--s0)/1.2 var(--f-display); font-stretch: 106%; }
+.gh__id span { font: 500 var(--s-1) var(--f-mono); color: var(--lilas); }
+.gh__profile .lab__go { margin-top: 0; }
+.gh__stats { margin-top: 16px; }
+.gh__stats dd { font-variant-numeric: tabular-nums; }
+.gh__repos .lab__item h3 { overflow-wrap: anywhere; }
+.gh__repos .lab__item p { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
+.gh__meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: auto; font: 500 0.75rem var(--f-mono); color: var(--muted); }
+.gh__fallback { margin-top: 24px; color: var(--muted); }
+.gh__fallback a { color: var(--lilas); }
 a.lab__item:active, button.lab__item:active { border-color: var(--rosa); }
 
 /* ---------- 04 · Trajetória ---------- */
@@ -677,6 +702,7 @@ a.lab__item:active, button.lab__item:active { border-color: var(--rosa); }
     height: auto;
     flex-direction: row; align-items: center; justify-content: space-between; gap: 24px;
     padding: 12px 0;
+    overflow: visible;
     margin: 0 calc(var(--gutter) * -1);
     padding-inline: var(--gutter);
     background: var(--bg);
@@ -815,7 +841,7 @@ a.lab__item:active, button.lab__item:active { border-color: var(--rosa); }
    para o conteúdo principal caber sem rolar o menu.
    ========================================================================= */
 @media (max-height: 500px) and (orientation: landscape) and (max-width: 1099px) {
-  .hero__name { font-size: clamp(2.8rem, 12vh, 5rem); }
+  .hero__name { font-size: min(clamp(2.8rem, 12vh, 5rem), 17cqi); }
 }
 /* Celular deitado estreito (< 700 px): menu em tela cheia com 2 colunas. */
 @media (max-height: 500px) and (orientation: landscape) and (max-width: 699px) {
