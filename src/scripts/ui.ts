@@ -71,7 +71,7 @@ if (!CSS.supports('animation-timeline: scroll()')) {
     queued = false;
     const max = document.documentElement.scrollHeight - innerHeight;
     const p = max > 0 ? Math.min(scrollY / max, 1) : 0;
-    root.style.setProperty('--depth', (p * (2 - p)).toFixed(3)); // ease-out: escurece cedo, assenta no fim
+    root.style.setProperty('--depth', (p * p).toFixed(3)); // ease-in: topo calmo, escurece forte no fim
   };
   const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
   addEventListener('scroll', queue, { passive: true });

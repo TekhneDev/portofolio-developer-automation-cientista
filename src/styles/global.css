@@ -132,18 +132,17 @@ kbd {
    por cima, intactas). No topo é invisível — o site fica como sempre foi;
    ao rolar, ganha um roxo cada vez mais escuro. Usa animação ligada ao
    scroll (roda fora da thread principal); onde não há suporte, ui.ts
-   escreve --depth (0 → 1) e o fallback abaixo assume. Só no tema escuro. */
+   escreve --depth (0 → 1) e o fallback abaixo assume. Só no tema escuro.
+   Todos os tons são MAIS ESCUROS que --bg: a página só escurece, nunca clareia. */
 .depth {
   position: fixed; inset: 0; z-index: -3; pointer-events: none;
-  background-color: #1A0A30;
+  background-color: #0B0614;
   opacity: 0;
 }
-/* Brilho violeta suave embaixo + vinheta nas bordas: dá profundidade, não "chapado". */
+/* Vinheta nas bordas: o escuro "fecha" em volta do conteúdo, sem ficar chapado. */
 .depth::before {
   content: ""; position: absolute; inset: 0;
-  background:
-    radial-gradient(120vmax 70vmax at 50% 115%, color-mix(in oklab, var(--roxo) 22%, transparent), transparent 60%),
-    radial-gradient(140vmax 100vmax at 50% 40%, transparent 45%, rgb(5 1 10 / 0.55) 100%);
+  background: radial-gradient(140vmax 100vmax at 50% 45%, transparent 40%, rgb(2 0 5 / 0.6) 100%);
 }
 @supports (animation-timeline: scroll()) {
   .depth {
@@ -151,16 +150,17 @@ kbd {
     animation-timeline: scroll(root block);
   }
 }
+/* Curva lenta no topo e forte no fim (ease-in): o começo fica como está. */
 @keyframes depth {
-  0%   { opacity: 0;    background-color: #1A0A30; }
-  12%  { opacity: 0.15; }
-  55%  { opacity: 0.8;  background-color: #170829; }
-  100% { opacity: 1;    background-color: #0C0318; }
+  0%   { opacity: 0;    background-color: #0B0614; }
+  35%  { opacity: 0.12; }
+  70%  { opacity: 0.5;  background-color: #08040F; }
+  100% { opacity: 1;    background-color: #040108; }
 }
 @supports not (animation-timeline: scroll()) {
   .depth {
     opacity: var(--depth, 0);
-    background-color: color-mix(in oklab, #1A0A30, #0C0318 calc(var(--depth, 0) * 100%));
+    background-color: color-mix(in oklab, #0B0614, #040108 calc(var(--depth, 0) * 100%));
   }
 }
 :root[data-theme="light"] .depth { display: none; }
