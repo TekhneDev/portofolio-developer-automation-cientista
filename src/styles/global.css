@@ -537,7 +537,6 @@ main:focus { outline: none; }
   display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
   gap: 24px 28px; padding: 24px;
 }
-.repo__media { margin: 0; display: grid; gap: 10px; align-content: start; }
 .repo__frame {
   aspect-ratio: 2 / 1; border: 1px solid var(--line); border-radius: 6px; overflow: hidden;
   background:
@@ -554,15 +553,46 @@ main:focus { outline: none; }
   color: transparent; -webkit-text-stroke: 1px color-mix(in oklab, var(--lilas) 60%, transparent);
   overflow-wrap: anywhere;
 }
-.repo__media figcaption { font: 500 0.78rem var(--f-mono); color: var(--muted); }
-.repo__thumbs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
-.repo__thumbs button {
-  display: block; width: 96px; aspect-ratio: 16 / 9; padding: 0; overflow: hidden;
-  border: 1px solid var(--line); border-radius: 4px; opacity: 0.6;
-  transition: opacity 0.2s, border-color 0.2s;
+/* Galeria (3 posições): trilho horizontal com scroll-snap — arrastar no
+   toque/trackpad é nativo; setas e bolinhas só rolam o trilho. */
+.gal { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.gal__view { position: relative; }
+.gal__track {
+  display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+  scrollbar-width: none; overscroll-behavior-x: contain; border-radius: 6px;
 }
-.repo__thumbs button img { width: 100%; height: 100%; object-fit: cover; }
-.repo__thumbs button:hover, .repo__thumbs [aria-pressed="true"] { opacity: 1; border-color: var(--lilas); }
+.gal__track::-webkit-scrollbar { display: none; }
+.gal__track:focus-visible { outline: 2px solid var(--lilas); outline-offset: 3px; }
+.gal__slide { flex: 0 0 100%; scroll-snap-align: start; scroll-snap-stop: always; display: grid; gap: 8px; }
+.gal__cap { font: 500 0.78rem var(--f-mono); color: var(--muted); }
+.gal__nav {
+  position: absolute; top: calc(50% - 22px); z-index: 2;
+  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--line) 70%, transparent);
+  background: color-mix(in oklab, var(--bg) 72%, transparent); backdrop-filter: blur(6px);
+  color: var(--ink); opacity: 0.85;
+  transition: opacity 0.2s, border-color 0.2s, transform 0.35s var(--spring);
+}
+.gal__nav--prev { left: 10px; }
+.gal__nav--next { right: 10px; }
+.gal__nav:hover { opacity: 1; border-color: var(--lilas); }
+.gal__nav--prev:active { transform: translateX(-2px) scale(0.94); }
+.gal__nav--next:active { transform: translateX(2px) scale(0.94); }
+.gal__bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.gal__dots { display: flex; gap: 2px; }
+.gal__dots button { width: 28px; height: 28px; display: grid; place-items: center; }
+.gal__dots button::before {
+  content: ""; width: 7px; height: 7px; border-radius: 99px; background: var(--line);
+  transition: width 0.35s var(--spring), background-color 0.2s;
+}
+.gal__dots button:hover::before { background: var(--muted); }
+.gal__dots [aria-current]::before { width: 22px; background: var(--lilas); }
+.gal__count { font: 500 0.75rem var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.repo__ph--soon {
+  -webkit-text-stroke: 0; color: var(--muted); gap: 10px; align-content: center;
+  font: 500 0.78rem var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase;
+}
+.repo__ph--soon svg { justify-self: center; opacity: 0.7; }
 
 .repo__info { display: grid; gap: 18px; align-content: start; }
 .repo__desc { font-size: var(--s0); line-height: 1.55; }

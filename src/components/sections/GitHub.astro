@@ -105,27 +105,50 @@ const fmtDate = (iso: string) =>
     });
 
     document.querySelectorAll<HTMLDialogElement>('dialog.repo').forEach((dlg) => {
-      const main = dlg.querySelector<HTMLImageElement>('[data-main]');
-      // Prévia indisponível: esconde a imagem quebrada e mostra o quadro com o nome.
-      if (main) {
-        const fail = () => main.classList.add('is-broken');
-        main.addEventListener('error', fail, { signal });
-        main.addEventListener('load', () => main.classList.remove('is-broken'), { signal });
-        if (main.complete && main.naturalWidth === 0 && main.currentSrc) fail();
-      }
-      const cap = dlg.querySelector<HTMLElement>('[data-caption]');
+      // Imagem indisponível (ex.: prévia do GitHub com limite): mostra o quadro com o nome.
+      dlg.querySelectorAll<HTMLImageElement>('[data-img]').forEach((img) => {
+        const fail = () => img.classList.add('is-broken');
+        img.addEventListener('error', fail, { signal });
+        if (img.complete && img.naturalWidth === 0 && img.currentSrc) fail();
+      });
+
+      /* Galeria: trilho com scroll-snap (arrastar funciona nativo); setas,
+         bolinhas e teclado só rolam o trilho até o slide certo. */
+      const track = dlg.querySelector<HTMLElement>('[data-track]');
+      const dots = [...dlg.querySelectorAll<HTMLButtonElement>('[data-dot]')];
+      const count = dlg.querySelector<HTMLElement>('[data-count]');
+      const prev = dlg.querySelector<HTMLButtonElement>('[data-prev]');
+      const next = dlg.querySelector<HTMLButtonElement>('[data-next]');
+      let cur = 0;
+      const total = dots.length;
+      const go = (i: number, smooth = true) => {
+        if (!track) return;
+        cur = (i + total) % total;               // circular: da última volta à primeira
+        track.scrollTo({ left: cur * track.clientWidth, behavior: smooth ? 'smooth' : 'instant' });
+      };
+      const sync = () => {
+        if (!track) return;
+        cur = Math.round(track.scrollLeft / track.clientWidth);
+        dots.forEach((d, i) => d.toggleAttribute('aria-current', i === cur));
+        if (count) count.textContent = `${cur + 1} / ${total}`;
+      };
+      let raf = 0;
+      track?.addEventListener('scroll', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(sync); }, { passive: true, signal });
+      prev?.addEventListener('click', () => go(cur - 1), { signal });
+      next?.addEventListener('click', () => go(cur + 1), { signal });
+      dots.forEach((d, i) => d.addEventListener('click', () => go(i), { signal }));
+      dlg.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') { e.preventDefault(); go(cur + 1); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); go(cur - 1); }
+      }, { signal });
+
       // Fecha no X ou clicando no fundo escurecido (fora do conteúdo).
       dlg.addEventListener('click', (e) => {
         const t = e.target as HTMLElement;
         if (t === dlg || t.closest('[data-close]')) dlg.close();
-        const thumb = t.closest<HTMLButtonElement>('[data-thumb]');
-        if (thumb && main) {
-          main.src = thumb.dataset.thumb!;
-          main.alt = thumb.dataset.alt!;
-          if (cap) cap.textContent = thumb.dataset.legenda ?? '';
-          dlg.querySelectorAll('[data-thumb]').forEach((b) => b.setAttribute('aria-pressed', String(b === thumb)));
-        }
       }, { signal });
+      // Sempre reabre na primeira imagem.
+      dlg.addEventListener('close', () => go(0, false), { signal });
       dlg.addEventListener('close', () => {
         emit(EVT.lock, false);
         document.documentElement.classList.remove('modal-open');

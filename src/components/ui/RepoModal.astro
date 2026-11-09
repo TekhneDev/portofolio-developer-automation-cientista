@@ -17,10 +17,13 @@ const { repo: r, extra } = Astro.props;
 
 const id = `gh-${r.name}`;
 const fmt = (iso: string) => new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
-const images = (extra?.imagens ?? []).map((i) => ({ ...i, src: url(i.src) }));
-const media = images.length
-  ? images
-  : [{ src: r.preview, alt: `Prévia do repositório ${r.name} no GitHub`, legenda: undefined }];
+/* Galeria: sempre 3 posições. Ordem: prints próprios (até 3) → prévia do
+   GitHub (se ainda não houver nenhum print) → quadros "em breve". */
+const SLOTS = 3;
+type Slide = { src?: string; alt: string; legenda?: string };
+const own: Slide[] = (extra?.imagens ?? []).slice(0, SLOTS).map((i) => ({ ...i, src: url(i.src) }));
+const slides: Slide[] = own.length ? own : [{ src: r.preview, alt: `Prévia do repositório ${r.name} no GitHub`, legenda: 'Prévia gerada pelo GitHub' }];
+while (slides.length < SLOTS) slides.push({ alt: `Imagem ${slides.length + 1} em breve` });
 const resumo = extra?.resumo;
 ---
 <dialog class="repo" id={id} aria-labelledby={`${id}-t`} data-lenis-prevent>
@@ -36,24 +39,44 @@ const resumo = extra?.resumo;
     </header>
 
     <div class="repo__body">
-      <figure class="repo__media">
-        <div class="repo__frame">
-          <img src={media[0].src} alt={media[0].alt} width="1200" height="600" loading="lazy" decoding="async" data-main />
-          <span class="repo__ph" aria-hidden="true">{r.name}</span>
-        </div>
-        {media[0].legenda && <figcaption data-caption>{media[0].legenda}</figcaption>}
-        {media.length > 1 && (
-          <ul class="repo__thumbs" aria-label="Imagens do projeto">
-            {media.map((m, i) => (
-              <li>
-                <button type="button" data-thumb={m.src} data-alt={m.alt} data-legenda={m.legenda ?? ''} aria-pressed={i === 0 ? 'true' : 'false'} aria-label={`Ver imagem ${i + 1}: ${m.alt}`}>
-                  <img src={m.src} alt="" width="120" height="68" loading="lazy" decoding="async" />
-                </button>
+      <section class="gal" aria-roledescription="carrossel" aria-label={`Imagens de ${r.name}`} data-gal>
+        <div class="gal__view">
+          <ul class="gal__track" data-track tabindex="0" aria-live="polite">
+            {slides.map((sl, i) => (
+              <li class="gal__slide" aria-roledescription="slide" aria-label={`${i + 1} de ${SLOTS}`}>
+                <div class="repo__frame">
+                  {sl.src ? (
+                    <>
+                      <img src={sl.src} alt={sl.alt} width="1200" height="600" loading="lazy" decoding="async" data-img />
+                      <span class="repo__ph" aria-hidden="true">{r.name}</span>
+                    </>
+                  ) : (
+                    <span class="repo__ph repo__ph--soon" role="img" aria-label={sl.alt}>
+                      <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="9" cy="10" r="1.6" fill="currentColor"/><path d="M4 17l5-5 4 4 3-3 4 4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                      <span>Imagem {i + 1} · em breve</span>
+                    </span>
+                  )}
+                </div>
+                {sl.legenda && <p class="gal__cap">{sl.legenda}</p>}
               </li>
             ))}
           </ul>
-        )}
-      </figure>
+          <button type="button" class="gal__nav gal__nav--prev" data-prev aria-label="Imagem anterior">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button type="button" class="gal__nav gal__nav--next" data-next aria-label="Próxima imagem">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <div class="gal__bar">
+          <div class="gal__dots">
+            {slides.map((_, i) => (
+              <button type="button" data-dot={i} aria-label={`Ir para imagem ${i + 1}`} aria-current={i === 0 ? 'true' : undefined}></button>
+            ))}
+          </div>
+          <span class="gal__count" data-count>1 / {SLOTS}</span>
+        </div>
+      </section>
 
       <div class="repo__info">
         <p class="repo__desc">{r.description ?? 'Sem descrição no GitHub.'}</p>
